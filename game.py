@@ -9,8 +9,8 @@ class Game:
     def opponent(self):
         return BLACK if self.current_player == WHITE else WHITE
 
-    def can_move(self, fr_row, fr_col, to_row, to_col):
-        piece = self.board.get_piece(fr_row, fr_col)
+    def can_move(self, from_row, from_col, to_row, to_col):
+        piece = self.board.get_piece(from_row, from_col)
         if piece == EMPTY or piece != self.current_player:
             return False
 
@@ -18,8 +18,8 @@ class Game:
         if target != EMPTY:
             return False
 
-        dr = to_row - fr_row
-        dc = abs(to_col - fr_col)
+        dr = to_row - from_row
+        dc = abs(to_col - from_col)
 
         # běžný tah o 1 diagonálně
         if abs(dr) == 1 and dc == 1:
@@ -30,8 +30,8 @@ class Game:
 
         # braní o 2 diagonálně
         if abs(dr) == 2 and dc == 2:
-            mid_row = (fr_row + to_row) // 2
-            mid_col = (fr_col + to_col) // 2
+            mid_row = (from_row + to_row) // 2
+            mid_col = (from_col + to_col) // 2
             middle_piece = self.board.get_piece(mid_row, mid_col)
             if middle_piece == self.opponent():
                 return True

@@ -8,6 +8,7 @@ COLORS = {
 }
 
 CELL_SIZE = 80  # velikost jednoho políčka (px)
+BOARD_SIZE = 8
 
 class CheckersGUI:
     def __init__(self, root):
@@ -57,8 +58,8 @@ class CheckersGUI:
                 self.selected = (r, c)
                 self.highlight_square(r, c)
         else:
-            fr_row, fr_col = self.selected
-            success = self.game.move(fr_row, fr_col, r, c)
+            from_row, from_col = self.selected
+            success = self.game.move(from_row, from_col, r, c)
             self.selected = None
             self.draw_board()
             if not success:
