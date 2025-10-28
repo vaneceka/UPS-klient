@@ -1,7 +1,7 @@
 import tkinter as tk
-from gui import CheckersGUI
+from gui.connection_form import ConnectionForm
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = CheckersGUI(root)
+    form = ConnectionForm(root)
     root.mainloop()

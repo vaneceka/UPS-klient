@@ -58,3 +58,5 @@ class Game:
 
     def switch_turn(self):
         self.current_player = self.opponent()
+
+    
