@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from gui.checkers_gui import CheckersGUI
+from gui.styled_button import StyledButton
 
 class LobbyWindow:
     def __init__(self, root, client, name):
@@ -40,38 +41,26 @@ class LobbyWindow:
         )
         self.status_label.pack(pady=10)
 
-        # Vlastní tlačítko Play (label s barvou)
-        self.play_button = tk.Label(
+        # Tlačítko Play
+        self.play_button = StyledButton(
             root,
             text="Play",
-            font=("Arial", 13, "bold"),
-            bg="#4CAF50",
-            fg="white",
-            padx=30,
-            pady=8,
-            cursor="hand2"
+            bg_color="#4CAF50",
+            hover_color="#45A049",
+            command=self.play
         )
         self.play_button.pack(pady=15)
-        self.play_button.bind("<Enter>", lambda e: self.play_button.config(bg="#45A049"))
-        self.play_button.bind("<Leave>", lambda e: self.play_button.config(bg="#4CAF50"))
-        self.play_button.bind("<Button-1>", lambda e: self.play())
 
         # Tlačítko Odhlásit se
-        self.disconnect_button = tk.Label(
+        self.disconnect_button = StyledButton(
             root,
             text="Odhlásit se",
-            font=("Arial", 12, "bold"),
-            bg="#E53935",
-            fg="white",
-            padx=20,
-            pady=6,
-            cursor="hand2"
+            bg_color="#E53935",
+            hover_color="#C62828",
+            command=self.disconnect
         )
         self.disconnect_button.pack(pady=(5, 10))
-        self.disconnect_button.bind("<Enter>", lambda e: self.disconnect_button.config(bg="#C62828"))
-        self.disconnect_button.bind("<Leave>", lambda e: self.disconnect_button.config(bg="#E53935"))
-        self.disconnect_button.bind("<Button-1>", lambda e: self.disconnect())
-
+        
         self.client.on_message_callback = self.handle_server_message
 
     def play(self):

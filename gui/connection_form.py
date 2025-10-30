@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import messagebox
 from gui.lobby_window import LobbyWindow
 from network import NetworkClient
+from gui.styled_button import StyledButton
 
 class ConnectionForm:
     def __init__(self, root):
@@ -30,10 +31,11 @@ class ConnectionForm:
         self.entry_port.insert(0, "5000")
 
         # -- TLAČÍTKO --
-        self.connect_button = tk.Button(
-            root, text="Připojit", font=("Arial", 13, "bold"),
-            bg="#4CAF50", fg="white", activebackground="#45A049",
-            relief="raised", padx=10, pady=5,
+        self.connect_button = StyledButton(
+            root,
+            text="Připojit",
+            bg_color="#4CAF50",
+            hover_color="#45A049",
             command=self.connect
         )
         self.connect_button.grid(row=3, column=0, columnspan=2, pady=15)
