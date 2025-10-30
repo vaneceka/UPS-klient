@@ -2,17 +2,19 @@ import socket
 import threading
 
 class NetworkClient:
-    def __init__(self, host, port, on_message_callback=None):
+    def __init__(self, host, port, on_message_callback=None, root=None):
         """
         :param host: IP adresa serveru (např. '127.0.0.1')
         :param port: port serveru (např. 5000)
         :param on_message_callback: funkce, která se zavolá, když přijde zpráva
+        :param root: hlavní Tkinter okno (kvůli thread-safe volání)
         """
         self.host = host
         self.port = port
         self.sock = None
         self.running = False
         self.on_message_callback = on_message_callback
+        self.root = root  # 👈 přidáno
 
     def connect(self):
         """Naváže spojení se serverem."""
@@ -46,7 +48,11 @@ class NetworkClient:
                     message = line.strip()
                     print(f"⬅️ {message}")
                     if self.on_message_callback:
-                        self.on_message_callback(message)
+                        # ✅ bezpečné volání ve vlákně Tkinteru
+                        if self.root:
+                            self.root.after(0, lambda msg=message: self.on_message_callback(msg))
+                        else:
+                            self.on_message_callback(message)
 
             except Exception as e:
                 print(f"❌ Chyba při čtení: {e}")

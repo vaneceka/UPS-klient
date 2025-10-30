@@ -4,6 +4,8 @@ from gui.lobby_window import LobbyWindow
 from network import NetworkClient
 from gui.styled_button import StyledButton
 
+
+
 class ConnectionForm:
     def __init__(self, root):
         self.root = root
@@ -28,7 +30,7 @@ class ConnectionForm:
         self.entry_port.grid(row=2, column=1, padx=10, pady=10, ipadx=5, ipady=3)
 
         self.entry_host.insert(0, "127.0.0.1")
-        self.entry_port.insert(0, "5000")
+        self.entry_port.insert(0, "5001")
 
         # -- TLAČÍTKO --
         self.connect_button = StyledButton(
@@ -44,8 +46,10 @@ class ConnectionForm:
         name = self.entry_name.get().strip()
         host = self.entry_host.get().strip()
         port = self.entry_port.get().strip()
+        client = NetworkClient(host, port, on_message_callback=self.handle_server_message, root=self.root)
 
         if not name or not host or not port:
+            
             messagebox.showwarning("Chyba", "Vyplňte všechna pole.")
             return
 
