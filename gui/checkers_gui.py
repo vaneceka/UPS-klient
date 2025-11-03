@@ -62,18 +62,31 @@ class CheckersGUI:
         for r in range(8):
             for c in range(8):
                 piece = self.board[r][c]
-                if piece != EMPTY:
+                if piece != 0:
                     x = c * CELL_SIZE + CELL_SIZE / 2
                     y = r * CELL_SIZE + CELL_SIZE / 2
                     radius = CELL_SIZE * 0.35
-                    color = "white" if piece == WHITE else "black"
+
+                    # Barvy figurky
+                    color = "white" if piece in (1, 3) else "black"
+                    outline = "gold" if piece in (3, 4) else "gray"
+
+                    # Nakresli ovál
                     self.canvas.create_oval(
                         x - radius, y - radius, x + radius, y + radius,
-                        fill=color, outline="gray", width=2, tags="piece"
+                        fill=color, outline=outline, width=3, tags="piece"
                     )
 
+                    # Pokud je to dáma, přidej korunku
+                    if piece in (3, 4):
+                        self.canvas.create_text(
+                            x, y, text="♛", font=("Arial", 20, "bold"),
+                            fill="gold" if piece == 3 else "white",
+                            tags="piece"
+                        )
+
     def on_click(self, event):
-        if not self.my_turn:
+        if not getattr(self, "my_turn", False):
             print("⏳ Není tvůj tah!")
             return
 
@@ -82,11 +95,14 @@ class CheckersGUI:
 
         if not self.selected:
             piece = self.board[r][c]
-            if (self.my_color == "WHITE" and piece == WHITE) or (self.my_color == "BLACK" and piece == BLACK):
+            # ✅ Povolit i výběr dámy (3 a 4)
+            if (self.my_color == "WHITE" and piece in (WHITE, 3)) or \
+            (self.my_color == "BLACK" and piece in (BLACK, 4)):
                 self.selected = (r, c)
                 self.highlight_square(r, c)
         else:
             from_row, from_col = self.selected
+            # Pošli tah serveru
             self.network.send(f"MOVE {from_row} {from_col} {r} {c}\n")
             self.selected = None
             self.canvas.delete("highlight")
