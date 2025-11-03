@@ -145,5 +145,16 @@ class CheckersGUI:
                 text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
                 self.turn_label.config(text=text)
                 self.my_turn = (color == self.my_color)  # ✅ tvůj tah
+
         elif message.startswith("GAME_OVER"):
-            self.turn_label.config(text="🎯 Konec hry!")
+            if "WIN" in message:
+                color = "BÍLÉ" if "WHITE" in message else "ČERNÉ"
+                self.turn_label.config(text=f"🎉 Konec hry! Vyhrály {color}")
+            elif "LOSE" in message:
+                color = "BÍLÉ" if "WHITE" in message else "ČERNÉ"
+                self.turn_label.config(text=f"💀 Prohra! Vyhrály {color}")
+        elif message.startswith("ERROR"):
+            print("⚠️ Chyba od serveru:", message)
+            # obnov výběr po chybě
+            self.selected = None
+            self.canvas.delete("highlight")
