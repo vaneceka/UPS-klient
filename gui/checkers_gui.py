@@ -147,14 +147,81 @@ class CheckersGUI:
                 self.my_turn = (color == self.my_color)  # ✅ tvůj tah
 
         elif message.startswith("GAME_OVER"):
-            if "WIN" in message:
-                color = "BÍLÉ" if "WHITE" in message else "ČERNÉ"
-                self.turn_label.config(text=f"🎉 Konec hry! Vyhrály {color}")
-            elif "LOSE" in message:
-                color = "BÍLÉ" if "WHITE" in message else "ČERNÉ"
-                self.turn_label.config(text=f"💀 Prohra! Vyhrály {color}")
-        elif message.startswith("ERROR"):
-            print("⚠️ Chyba od serveru:", message)
-            # obnov výběr po chybě
-            self.selected = None
-            self.canvas.delete("highlight")
+            parts = message.strip().split()
+            result_text = "🎯 Konec hry!"
+            color = None
+
+            if "WIN" in parts:
+                if "WHITE" in parts:
+                    result_text = "🎉 Vyhrály bílé!"
+                    color = "green"
+                elif "BLACK" in parts:
+                    result_text = "🎉 Vyhrály černé!"
+                    color = "green"
+                else:
+                    result_text = "🎉 Vyhrál jsi!"
+                    color = "green"
+            elif "LOSE" in parts:
+                result_text = "💀 Prohrál jsi!"
+                color = "red"
+
+            self.turn_label.config(text=result_text, fg=color)
+            self.my_turn = False  # vypne možnost hrát
+
+            # 💬 otevři Game Over okno
+            self.show_game_over_screen(result_text)
+
+    def show_game_over_screen(self, result_text):
+        """Zobrazí okno s výsledkem hry a tlačítky."""
+        win = tk.Toplevel(self.root)
+        win.title("Konec hry")
+        win.geometry("300x180")
+        win.configure(bg="#F5F5F5")
+
+        label = tk.Label(
+            win,
+            text=result_text,
+            font=("Arial", 16, "bold"),
+            bg="#F5F5F5",
+            fg="green" if "Vyhrál" in result_text or "🎉" in result_text else "red"
+        )
+        label.pack(pady=20)
+
+        btn_again = tk.Button(
+            win,
+            text="🔁 Hrát znovu",
+            font=("Arial", 12),
+            bg="#4CAF50", fg="white",
+            relief="raised",
+            command=lambda: self.restart_to_lobby(win)
+        )
+        btn_again.pack(pady=8, ipadx=10, ipady=4)
+
+        btn_exit = tk.Button(
+            win,
+            text="🚪 Ukončit hru",
+            font=("Arial", 12),
+            bg="#E53935", fg="white",
+            relief="raised",
+            command=lambda: self.quit_game(win)
+        )
+        btn_exit.pack(pady=8, ipadx=10, ipady=4)
+
+    def restart_to_lobby(self, win):
+        """Zavře okno a pošle hráče zpět do lobby."""
+        win.destroy()
+        self.root.destroy()
+        from gui.lobby_window import LobbyWindow
+        import tkinter as tk
+        new_root = tk.Tk()
+        LobbyWindow(new_root, self.network, self.my_name)
+        new_root.mainloop()
+
+    def quit_game(self, win):
+        """Odpojí hráče a zavře aplikaci."""
+        win.destroy()
+        try:
+            self.network.send("BYE\n")
+        except Exception:
+            pass
+        self.root.destroy()
