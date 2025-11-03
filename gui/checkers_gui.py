@@ -89,12 +89,18 @@ class CheckersGUI:
             from_row, from_col = self.selected
             self.network.send(f"MOVE {from_row} {from_col} {r} {c}\n")
             self.selected = None
+            self.canvas.delete("highlight")
+        
 
     def highlight_square(self, r, c):
-        """Zvýrazní vybranou figurku"""
         x1, y1 = c * CELL_SIZE, r * CELL_SIZE
         x2, y2 = x1 + CELL_SIZE, y1 + CELL_SIZE
-        self.canvas.create_rectangle(x1, y1, x2, y2, outline=COLORS["highlight"], width=4)
+        self.canvas.create_rectangle(
+            x1, y1, x2, y2,
+            outline=COLORS["highlight"],
+            width=4,
+            tags="highlight"
+        )
 
     def update_from_server(self, board_message: str):
         """Aktualizuje hrací desku podle zprávy BOARD ..."""

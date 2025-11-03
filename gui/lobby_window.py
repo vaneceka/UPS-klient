@@ -40,7 +40,8 @@ class LobbyWindow:
     # ======== Herní logika lobby ========
 
     def play(self):
-        self.play_button.config(state="disabled", bg="#888")  # ✅ zneaktivní
+        """Pošli požadavek na zahájení hry (jen jednou)"""
+        self.play_button.disable()  # ✅ místo config()
         self.client.send("PLAY")
         self.status_label.config(text="⏳ Čekám na protihráče...")
 
