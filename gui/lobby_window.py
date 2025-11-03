@@ -40,7 +40,7 @@ class LobbyWindow:
     # ======== Herní logika lobby ========
 
     def play(self):
-        """Pošli požadavek na zahájení hry"""
+        self.play_button.config(state="disabled", bg="#888")  # ✅ zneaktivní
         self.client.send("PLAY")
         self.status_label.config(text="⏳ Čekám na protihráče...")
 
@@ -51,10 +51,12 @@ class LobbyWindow:
             self.status_label.config(text="Čekám na druhého hráče...")
 
         elif message.startswith("GAME_START"):
-            # očekává: GAME_START COLOR WHITE/BLACK
             parts = message.strip().split()
-            my_color = parts[3] if len(parts) >= 4 else "WHITE"
-            self.status_label.config(text=f"🎮 Hra začíná! ({my_color})")
+            if len(parts) >= 3 and parts[1].upper() == "COLOR":
+                my_color = parts[2].upper()
+            else:
+                my_color = "WHITE"
+            print(f"🎨 Přidělená barva: {my_color}")
             self.start_game(my_color)
 
         elif message.startswith("ERROR"):

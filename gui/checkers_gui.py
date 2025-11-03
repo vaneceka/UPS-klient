@@ -73,18 +73,20 @@ class CheckersGUI:
                     )
 
     def on_click(self, event):
+        if not self.my_turn:
+            print("⏳ Není tvůj tah!")
+            return
+
         c = event.x // CELL_SIZE
         r = event.y // CELL_SIZE
 
         if not self.selected:
-            # vyber figurku (klidně jen označ)
             piece = self.board[r][c]
-            if piece in (WHITE, BLACK):
+            if (self.my_color == "WHITE" and piece == WHITE) or (self.my_color == "BLACK" and piece == BLACK):
                 self.selected = (r, c)
                 self.highlight_square(r, c)
         else:
             from_row, from_col = self.selected
-            # pošli tah serveru
             self.network.send(f"MOVE {from_row} {from_col} {r} {c}\n")
             self.selected = None
 
@@ -110,17 +112,16 @@ class CheckersGUI:
         self.update_board()
 
     def handle_server_message(self, message: str):
-        """Zpracuje zprávy ze serveru (BOARD, TURN, GAME_OVER)"""
         print("📩 [GUI] Server:", message)
 
         if message.startswith("BOARD"):
             self.update_from_server(message)
         elif message.startswith("TURN"):
-            # TURN WHITE / TURN BLACK
             parts = message.strip().split()
             if len(parts) >= 2:
                 color = parts[1].upper()
                 text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
                 self.turn_label.config(text=text)
+                self.my_turn = (color == self.my_color)  # ✅ tvůj tah
         elif message.startswith("GAME_OVER"):
             self.turn_label.config(text="🎯 Konec hry!")
