@@ -34,6 +34,8 @@ class LobbyWindow:
                                               command=self.disconnect)
         self.disconnect_button.pack(pady=(5, 10))
 
+        self.root.protocol("WM_DELETE_WINDOW", self.disconnect)
+
         # Po připojení poslouchej zprávy ze serveru
         self.client.on_message_callback = self.handle_server_message
 
@@ -88,10 +90,10 @@ class LobbyWindow:
         self.client.on_message_callback = gui.handle_server_message
 
     def disconnect(self):
-        """Ukončí připojení a zavře okno"""
         try:
+            self.client.send("BYE\n")
             self.client.close()
         except Exception:
             pass
         self.root.destroy()
-        messagebox.showinfo("Odhlášení", "Byl jsi odpojen od serveru.")
+        # messagebox.showinfo("Odhlášení", "Byl jsi odpojen od serveru.")
