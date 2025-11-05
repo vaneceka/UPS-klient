@@ -14,16 +14,18 @@ CELL_SIZE = 80  # velikost jednoho políčka (px)
 BOARD_SIZE = 8
 
 class CheckersGUI:
-    def __init__(self, root, my_color="WHITE", my_name = "?"):
+    def __init__(self, root, my_color="WHITE", my_name = "?", opponent_name = "?"):
         self.root = root
         self.root.title("Dáma")
         self.my_color = my_color
         self.my_name = my_name
+        self.opponent_name = opponent_name
 
         # Horní informační panel
         top_frame = tk.Frame(self.root)
         top_frame.pack(fill="x", pady=4)
 
+        # Levá strana
         self.info_label = tk.Label(
             top_frame,
             text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper() == 'WHITE' else 'ČERNÉ'}",
@@ -31,6 +33,14 @@ class CheckersGUI:
         )
         self.info_label.pack(side="left", padx=8)
 
+        # Pravá strana – soupeř
+        self.opponent_label = tk.Label(
+            top_frame,
+            text=f"Hraješ proti: {self.opponent_name}",
+            font=("Arial", 12,)
+        )
+        self.opponent_label.pack(side="right", padx=10)
+        
         self.turn_label = tk.Label(
             top_frame,
             text="Čekám na server...",

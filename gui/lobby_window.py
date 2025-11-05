@@ -57,13 +57,23 @@ class LobbyWindow:
                 my_color = parts[2].upper()
             else:
                 my_color = "WHITE"
-            print(f"🎨 Přidělená barva: {my_color}")
-            self.start_game(my_color)
+
+            if "OPPONENT" in parts:
+                idx = parts.index("OPPONENT")
+                if idx + 1 < len(parts):
+                    opponent_name = parts[idx + 1]
+                else:
+                    opponent_name = "?"
+            else:
+                opponent_name = "?"
+
+            print(f"🎨 Přidělená barva: {my_color}, soupeř {opponent_name}")
+            self.start_game(my_color, opponent_name)
 
         elif message.startswith("ERROR"):
             messagebox.showerror("Chyba", message)
 
-    def start_game(self, my_color):
+    def start_game(self, my_color,opponent_name):
         """Skryje lobby a otevře herní okno"""
         self.root.withdraw()
 
@@ -71,7 +81,7 @@ class LobbyWindow:
         root_game.title("Dáma")
 
         # ⬇️ Předáme jméno hráče do hry
-        gui = CheckersGUI(root_game, my_color=my_color, my_name=self.name)
+        gui = CheckersGUI(root_game, my_color=my_color, my_name=self.name, opponent_name=opponent_name)
         gui.network = self.client
 
         # Přesměruj zprávy na GUI hry
