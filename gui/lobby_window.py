@@ -70,14 +70,12 @@ class LobbyWindow:
         root_game = tk.Toplevel(self.root)
         root_game.title("Dáma")
 
-        gui = CheckersGUI(root_game, my_color=my_color)
+        # ⬇️ Předáme jméno hráče do hry
+        gui = CheckersGUI(root_game, my_color=my_color, my_name=self.name)
         gui.network = self.client
 
         # Přesměruj zprávy na GUI hry
         self.client.on_message_callback = gui.handle_server_message
-
-        # POZOR: druhý mainloop NE!
-        # root_game.mainloop()  ❌  -> hlavní loop už běží v main.py
 
     def disconnect(self):
         """Ukončí připojení a zavře okno"""

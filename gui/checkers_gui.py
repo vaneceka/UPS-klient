@@ -14,10 +14,11 @@ CELL_SIZE = 80  # velikost jednoho políčka (px)
 BOARD_SIZE = 8
 
 class CheckersGUI:
-    def __init__(self, root, my_color="WHITE"):
+    def __init__(self, root, my_color="WHITE", my_name = "?"):
         self.root = root
         self.root.title("Dáma")
         self.my_color = my_color
+        self.my_name = my_name
 
         # Horní informační panel
         top_frame = tk.Frame(self.root)
@@ -172,12 +173,16 @@ class CheckersGUI:
             self.show_game_over_screen(result_text)
 
     def show_game_over_screen(self, result_text):
-        """Zobrazí okno s výsledkem hry a tlačítky."""
+        """Zobrazí okno s výsledkem hry a tlačítky StyledButton."""
+        from gui.styled_button import StyledButton  # import tvé classy
+
         win = tk.Toplevel(self.root)
         win.title("Konec hry")
-        win.geometry("300x180")
+        win.geometry("320x200")
         win.configure(bg="#F5F5F5")
+        win.resizable(False, False)
 
+        # 🏁 Výsledek
         label = tk.Label(
             win,
             text=result_text,
@@ -185,37 +190,46 @@ class CheckersGUI:
             bg="#F5F5F5",
             fg="green" if "Vyhrál" in result_text or "🎉" in result_text else "red"
         )
-        label.pack(pady=20)
+        label.pack(pady=25)
 
-        btn_again = tk.Button(
+        # 🔁 Hrát znovu (jen pokud má smysl)
+        StyledButton(
             win,
             text="🔁 Hrát znovu",
-            font=("Arial", 12),
-            bg="#4CAF50", fg="white",
-            relief="raised",
+            bg_color="#4CAF50",
+            hover_color="#45A049",
             command=lambda: self.restart_to_lobby(win)
-        )
-        btn_again.pack(pady=8, ipadx=10, ipady=4)
+        ).pack(pady=6)
 
-        btn_exit = tk.Button(
+        # 🚪 Ukončit hru
+        StyledButton(
             win,
             text="🚪 Ukončit hru",
-            font=("Arial", 12),
-            bg="#E53935", fg="white",
-            relief="raised",
+            bg_color="#E53935",
+            hover_color="#C62828",
             command=lambda: self.quit_game(win)
-        )
-        btn_exit.pack(pady=8, ipadx=10, ipady=4)
-
+        ).pack(pady=6)
+        
     def restart_to_lobby(self, win):
-        """Zavře okno a pošle hráče zpět do lobby."""
-        win.destroy()
-        self.root.destroy()
-        from gui.lobby_window import LobbyWindow
+        """Vrátí hráče do lobby po skončení hry."""
         import tkinter as tk
-        new_root = tk.Tk()
-        LobbyWindow(new_root, self.network, self.my_name)
-        new_root.mainloop()
+        from gui.lobby_window import LobbyWindow
+
+        # Zavřít koncové okno i hlavní herní okno
+        try:
+            win.destroy()
+            self.root.destroy()
+        except Exception:
+            pass
+
+        # Nové hlavní okno
+        root = tk.Tk()
+        root.title("Lobby")
+
+        # Otevře lobby s původním klientem a jménem
+        LobbyWindow(root, self.network, self.my_name)
+
+        root.mainloop()
 
     def quit_game(self, win):
         """Odpojí hráče a zavře aplikaci."""
