@@ -211,25 +211,15 @@ class CheckersGUI:
         ).pack(pady=6)
         
     def restart_to_lobby(self, win):
-        """Vrátí hráče do lobby po skončení hry."""
-        import tkinter as tk
+        """Vrátí hráče zpět do lobby (ve stejném okně)."""
         from gui.lobby_window import LobbyWindow
+        win.destroy()
 
-        # Zavřít koncové okno i hlavní herní okno
-        try:
-            win.destroy()
-            self.root.destroy()
-        except Exception:
-            pass
+        # Vyčisti hlavní okno hry
+        for widget in self.root.winfo_children():
+            widget.destroy()
 
-        # Nové hlavní okno
-        root = tk.Tk()
-        root.title("Lobby")
-
-        # Otevře lobby s původním klientem a jménem
-        LobbyWindow(root, self.network, self.my_name)
-
-        root.mainloop()
+        LobbyWindow(self.root, self.network, self.my_name)
 
     def quit_game(self, win):
         """Odpojí hráče a zavře aplikaci."""

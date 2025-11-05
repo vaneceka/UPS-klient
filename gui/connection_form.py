@@ -12,6 +12,7 @@ class ConnectionForm:
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")  # světle šedé pozadí
         self.root.geometry("350x250")
+        self.center_window(350, 250)
 
         # -- LABELY --
         tk.Label(root, text="Přezdívka:", font=("Arial", 13), bg="#F5F5F5", fg="#333").grid(row=0, column=0, padx=10, pady=10, sticky="e")
@@ -73,8 +74,21 @@ class ConnectionForm:
         print("📩 Server:", message)
 
     def open_lobby(self, client, name):
-        """Zavře formulář a otevře lobby"""
-        self.root.destroy()
-        root_lobby = tk.Tk()
-        lobby = LobbyWindow(root_lobby, client, name)
-        root_lobby.mainloop()
+        """Vyčistí aktuální obsah a zobrazí lobby ve stejném okně"""
+        # Vyčisti celé okno (connection form)
+        for widget in self.root.winfo_children():
+            widget.destroy()
+
+        # Nastav nové rozměry (pokud chceš)
+        self.root.geometry("350x250")
+
+        # Vytvoř lobby přímo v tom samém okně
+        LobbyWindow(self.root, client, name)
+
+    def center_window(self, width, height):
+        """Umístí okno doprostřed obrazovky."""
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        x = int((screen_width / 2) - (width / 2))
+        y = int((screen_height / 2) - (height / 2))
+        self.root.geometry(f"{width}x{height}+{x}+{y}")
