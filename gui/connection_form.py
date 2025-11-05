@@ -4,44 +4,64 @@ from gui.lobby_window import LobbyWindow
 from network import NetworkClient
 from gui.styled_button import StyledButton
 
-
-
 class ConnectionForm:
     def __init__(self, root):
         self.root = root
         self.root.title("Připojení k serveru")
-        self.root.configure(bg="#F5F5F5")  # světle šedé pozadí
-        self.root.geometry("350x250")
-        self.center_window(350, 250)
+        self.root.configure(bg="#F5F5F5")
+        self.root.geometry("350x280")
+        self.center_window(350, 280)
 
-        # -- LABELY --
-        tk.Label(root, text="Přezdívka:", font=("Arial", 13), bg="#F5F5F5", fg="#333").grid(row=0, column=0, padx=10, pady=10, sticky="e")
-        tk.Label(root, text="Adresa serveru:", font=("Arial", 13), bg="#F5F5F5", fg="#333").grid(row=1, column=0, padx=10, pady=10, sticky="e")
-        tk.Label(root, text="Port:", font=("Arial", 13), bg="#F5F5F5", fg="#333").grid(row=2, column=0, padx=10, pady=10, sticky="e")
+        # --- HLAVNÍ OBALOVACÍ FRAME ---
+        main_frame = tk.Frame(root, bg="#F5F5F5")
+        main_frame.pack(expand=True)
 
-        # -- TEXTOVÁ POLE --
-        entry_style = {"font": ("Arial", 13), "bg": "white", "fg": "black", "bd": 2, "relief": "groove", "insertbackground": "black"}
+        # --- PŘEZDÍVKA ---
+        tk.Label(
+            main_frame, text="Přezdívka:", font=("Arial", 13),
+            bg="#F5F5F5", fg="#333"
+        ).pack(anchor="center", pady=(10, 3))
+        self.entry_name = tk.Entry(
+            main_frame, font=("Arial", 13),
+            bg="white", fg="black", bd=2, relief="groove", insertbackground="black"
+        )
+        self.entry_name.pack(ipadx=5, ipady=3, pady=(0, 10))
 
-        self.entry_name = tk.Entry(root, **entry_style)
-        self.entry_host = tk.Entry(root, **entry_style)
-        self.entry_port = tk.Entry(root, **entry_style)
-
-        self.entry_name.grid(row=0, column=1, padx=10, pady=10, ipadx=5, ipady=3)
-        self.entry_host.grid(row=1, column=1, padx=10, pady=10, ipadx=5, ipady=3)
-        self.entry_port.grid(row=2, column=1, padx=10, pady=10, ipadx=5, ipady=3)
-
+        # --- ADRESA SERVERU ---
+        tk.Label(
+            main_frame, text="Adresa serveru:", font=("Arial", 13),
+            bg="#F5F5F5", fg="#333"
+        ).pack(anchor="center", pady=(5, 3))
+        self.entry_host = tk.Entry(
+            main_frame, font=("Arial", 13),
+            bg="white", fg="black", bd=2, relief="groove", insertbackground="black"
+        )
+        self.entry_host.pack(ipadx=5, ipady=3, pady=(0, 10))
         self.entry_host.insert(0, "127.0.0.1")
+
+        # --- PORT ---
+        tk.Label(
+            main_frame, text="Port:", font=("Arial", 13),
+            bg="#F5F5F5", fg="#333"
+        ).pack(anchor="center", pady=(5, 3))
+        self.entry_port = tk.Entry(
+            main_frame, font=("Arial", 13),
+            bg="white", fg="black", bd=2, relief="groove", insertbackground="black"
+        )
+        self.entry_port.pack(ipadx=5, ipady=3, pady=(0, 10))
         self.entry_port.insert(0, "5001")
 
-        # -- TLAČÍTKO --
+        # --- TLAČÍTKO ---
         self.connect_button = StyledButton(
-            root,
+            main_frame,
             text="Připojit",
             bg_color="#4CAF50",
             hover_color="#45A049",
             command=self.connect
         )
-        self.connect_button.grid(row=3, column=0, columnspan=2, pady=15)
+        self.connect_button.pack(pady=(15, 10))
+
+    # ==== FUNKCE ====
 
     def connect(self):
         name = self.entry_name.get().strip()
@@ -50,7 +70,6 @@ class ConnectionForm:
         client = NetworkClient(host, port, on_message_callback=self.handle_server_message, root=self.root)
 
         if not name or not host or not port:
-            
             messagebox.showwarning("Chyba", "Vyplňte všechna pole.")
             return
 
@@ -75,14 +94,9 @@ class ConnectionForm:
 
     def open_lobby(self, client, name):
         """Vyčistí aktuální obsah a zobrazí lobby ve stejném okně"""
-        # Vyčisti celé okno (connection form)
         for widget in self.root.winfo_children():
             widget.destroy()
-
-        # Nastav nové rozměry (pokud chceš)
         self.root.geometry("350x250")
-
-        # Vytvoř lobby přímo v tom samém okně
         LobbyWindow(self.root, client, name)
 
     def center_window(self, width, height):

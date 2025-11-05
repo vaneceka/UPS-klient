@@ -10,7 +10,7 @@ class LobbyWindow:
         self.name = name
 
         self.root.title("Lobby")
-        self.root.geometry("350x250")
+        self.root.geometry("350x280")
         self.root.configure(bg="#F5F5F5")
 
         tk.Label(root, text="Lobby", font=("Arial", 18, "bold"),
