@@ -17,6 +17,8 @@ class CheckersGUI:
     def __init__(self, root, my_color="WHITE", my_name = "?", opponent_name = "?"):
         self.root = root
         self.root.title("Dáma")
+        self.root.protocol("WM_DELETE_WINDOW", self.on_window_close)
+        self.in_game = True
         self.my_color = my_color
         self.my_name = my_name
         self.opponent_name = opponent_name
@@ -178,6 +180,7 @@ class CheckersGUI:
 
             self.turn_label.config(text=result_text, fg=color)
             self.my_turn = False  # vypne možnost hrát
+            self.in_game = False
 
             # 💬 otevři Game Over okno
             self.show_game_over_screen(result_text)
@@ -238,4 +241,15 @@ class CheckersGUI:
             self.network.send("BYE\n")
         except Exception:
             pass
+        self.root.destroy()
+
+    def on_window_close(self):
+        """Zachytí klik na křížek v herním okně."""
+        try:
+            # pošli BYE jen pokud jsme stále „ve hře“
+            if getattr(self, "in_game", False) and hasattr(self, "network"):
+                self.network.send("BYE\n")
+        except Exception:
+            pass
+        # zavři hlavní herní okno
         self.root.destroy()
