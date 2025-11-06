@@ -1,4 +1,5 @@
 import tkinter as tk
+from gui.utils import center_window
 
 WHITE = 1
 BLACK = 2
@@ -17,6 +18,7 @@ class CheckersGUI:
     def __init__(self, root, my_color="WHITE", my_name = "?", opponent_name = "?"):
         self.root = root
         self.root.title("Dáma")
+        center_window(root, 680, 690)
         self.root.protocol("WM_DELETE_WINDOW", self.on_window_close)
         self.in_game = True
         self.my_color = my_color
@@ -188,13 +190,15 @@ class CheckersGUI:
     def show_game_over_screen(self, result_text):
         """Zobrazí okno s výsledkem hry a tlačítky StyledButton."""
         from gui.styled_button import StyledButton  # import tvé classy
+        from gui.utils import center_window
+
 
         win = tk.Toplevel(self.root)
         win.title("Konec hry")
-        win.geometry("320x200")
         win.configure(bg="#F5F5F5")
         win.resizable(False, False)
 
+        center_window(win, 350, 280)
         # 🏁 Výsledek
         label = tk.Label(
             win,

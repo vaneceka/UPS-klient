@@ -3,6 +3,7 @@ from tkinter import messagebox
 from gui.lobby_window import LobbyWindow
 from network import NetworkClient
 from gui.styled_button import StyledButton
+from gui.utils import center_window
 
 class ConnectionForm:
     def __init__(self, root):
@@ -10,7 +11,7 @@ class ConnectionForm:
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")
         self.root.geometry("350x280")
-        self.center_window(350, 280)
+        center_window(root,350, 280)
 
         # --- HLAVNÍ OBALOVACÍ FRAME ---
         main_frame = tk.Frame(root, bg="#F5F5F5")
@@ -99,10 +100,10 @@ class ConnectionForm:
         self.root.geometry("350x250")
         LobbyWindow(self.root, client, name)
 
-    def center_window(self, width, height):
-        """Umístí okno doprostřed obrazovky."""
-        screen_width = self.root.winfo_screenwidth()
-        screen_height = self.root.winfo_screenheight()
-        x = int((screen_width / 2) - (width / 2))
-        y = int((screen_height / 2) - (height / 2))
-        self.root.geometry(f"{width}x{height}+{x}+{y}")
+    # def center_window(self, width, height):
+    #     """Umístí okno doprostřed obrazovky."""
+    #     screen_width = self.root.winfo_screenwidth()
+    #     screen_height = self.root.winfo_screenheight()
+    #     x = int((screen_width / 2) - (width / 2))
+    #     y = int((screen_height / 2) - (height / 2))
+    #     self.root.geometry(f"{width}x{height}+{x}+{y}")
