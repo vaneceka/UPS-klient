@@ -207,7 +207,7 @@ class CheckersGUI:
 
     def show_game_over_screen(self, result_text):
         """Zobrazí okno s výsledkem hry a tlačítky StyledButton."""
-        from gui.styled_button import StyledButton  # import tvé classy
+        from gui.styled_button import StyledButton 
         from gui.utils import center_window
 
 
