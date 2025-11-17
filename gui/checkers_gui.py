@@ -136,18 +136,27 @@ class CheckersGUI:
         )
 
     def update_from_server(self, board_message: str):
-        """Aktualizuje hrací desku podle zprávy BOARD"""
         parts = board_message.strip().split()
-        values = parts[1:]
-        if len(values) < 64:
-            print("BOARD nekompletní:", board_message)
+
+        # BOARD + 64 hodnot
+        if len(parts) < 65:
+            print("Nekompletní BOARD:", board_message)
             return
 
-        # Převeď data do 8x8 matice
-        nums = [int(x) for x in values[:64]]
-        self.board = [nums[i*8:(i+1)*8] for i in range(8)]
+        values = parts[1:65]  # přesně 64 čísel jako stringy
 
-        # Vykresli figurky
+        board = []
+        index = 0
+
+        # Naplň 8 řádků po 8 hodnotách
+        for _ in range(8):
+            row = []
+            for _ in range(8):
+                row.append(int(values[index]))
+                index += 1
+            board.append(row)
+
+        self.board = board
         self.update_board()
 
     def handle_server_message(self, message: str):
