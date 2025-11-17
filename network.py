@@ -14,7 +14,7 @@ class NetworkClient:
         self.sock = None
         self.running = False
         self.on_message_callback = on_message_callback
-        self.root = root  # 👈 přidáno
+        self.root = root
 
     def connect(self):
         """Naváže spojení se serverem."""
@@ -22,13 +22,13 @@ class NetworkClient:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.host, self.port))
             self.running = True
-            print(f"✅ Připojeno k serveru {self.host}:{self.port}")
+            print(f"Připojeno k serveru {self.host}:{self.port}")
 
             # posloucháme příchozí zprávy v jiném vlákně
             threading.Thread(target=self.listen, daemon=True).start()
             return True
         except Exception as e:
-            print(f"❌ Chyba při připojení: {e}")
+            print(f"Chyba při připojení: {e}")
             return False
 
     def listen(self):
@@ -38,7 +38,7 @@ class NetworkClient:
             try:
                 data = self.sock.recv(1024)
                 if not data:
-                    print("⚠️ Server ukončil spojení.")
+                    print("Server ukončil spojení.")
                     self.running = False
                     break
 
@@ -46,16 +46,15 @@ class NetworkClient:
                 while "\n" in buffer:
                     line, buffer = buffer.split("\n", 1)
                     message = line.strip()
-                    print(f"⬅️ {message}")
+                    print(f"{message}")
                     if self.on_message_callback:
-                        # ✅ bezpečné volání ve vlákně Tkinteru
                         if self.root:
                             self.root.after(0, lambda msg=message: self.on_message_callback(msg))
                         else:
                             self.on_message_callback(message)
 
             except Exception as e:
-                print(f"❌ Chyba při čtení: {e}")
+                print(f"Chyba při čtení: {e}")
                 self.running = False
                 break
 
@@ -73,4 +72,4 @@ class NetworkClient:
         self.running = False
         if self.sock:
             self.sock.close()
-        print("🔌 Odpojeno od serveru.")
+        print("Odpojeno od serveru.")

@@ -39,13 +39,11 @@ class LobbyWindow:
         # Po připojení poslouchej zprávy ze serveru
         self.client.on_message_callback = self.handle_server_message
 
-    # ======== Herní logika lobby ========
-
     def play(self):
         """Pošli požadavek na zahájení hry (jen jednou)"""
-        self.play_button.disable()  # ✅ místo config()
+        self.play_button.disable() 
         self.client.send("PLAY")
-        self.status_label.config(text="⏳ Čekám na protihráče...")
+        self.status_label.config(text="Čekám na protihráče...")
 
     def handle_server_message(self, message):
         print("Server:", message)
@@ -69,7 +67,7 @@ class LobbyWindow:
             else:
                 opponent_name = "?"
 
-            print(f"🎨 Přidělená barva: {my_color}, soupeř {opponent_name}")
+            print(f"Přidělená barva: {my_color}, soupeř {opponent_name}")
             self.start_game(my_color, opponent_name)
 
         elif message.startswith("ERROR"):
