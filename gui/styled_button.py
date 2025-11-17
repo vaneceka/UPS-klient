@@ -17,7 +17,7 @@ class StyledButton(tk.Label):
         self.default_bg = bg_color
         self.hover_bg = hover_color
         self.command = command
-        self.enabled = True  # ✅ nový příznak
+        self.enabled = True  
 
         # Hover efekty
         self.bind("<Enter>", lambda e: self._on_hover(True))
