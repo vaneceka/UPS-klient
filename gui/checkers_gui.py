@@ -118,7 +118,7 @@ class CheckersGUI:
         else:
             from_row, from_col = self.selected
             # Pošli tah serveru
-            self.network.send(f"MOVE {from_row} {from_col} {r} {c}\n")
+            self.network.send(f"MOVE {from_row} {from_col} {r} {c}")
             self.selected = None
             self.canvas.delete("highlight")
         
