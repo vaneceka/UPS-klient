@@ -48,7 +48,7 @@ class LobbyWindow:
         self.status_label.config(text="⏳ Čekám na protihráče...")
 
     def handle_server_message(self, message):
-        print("📩 Server:", message)
+        print("Server:", message)
 
         if message.startswith("WAIT"):
             self.status_label.config(text="Čekám na druhého hráče...")
@@ -82,7 +82,7 @@ class LobbyWindow:
         root_game = tk.Toplevel(self.root)
         root_game.title("Dáma")
 
-        # ⬇️ Předáme jméno hráče do hry
+        # Předáme jméno hráče do hry
         gui = CheckersGUI(root_game, my_color=my_color, my_name=self.name, opponent_name=opponent_name)
         gui.network = self.client
 

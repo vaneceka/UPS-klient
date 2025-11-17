@@ -64,9 +64,9 @@ class NetworkClient:
         if self.sock and self.running:
             try:
                 self.sock.sendall((message + "\n").encode("utf-8"))
-                print(f"➡️ {message}")
+                print(f"{message}")
             except Exception as e:
-                print(f"❌ Chyba při odesílání: {e}")
+                print(f"Chyba při odesílání: {e}")
 
     def close(self):
         """Ukončí spojení."""

@@ -72,6 +72,6 @@ class ClientStateMachine:
         if self.state in [ClientState.WHITE_MOVE, ClientState.BLACK_MOVE]:
             self.network.send(f"MOVE {fr} {fc} {tr} {tc}")
             self.state = ClientState.EVALUATE_MOVE
-            print("📤 Odeslán tah, čekám na potvrzení...")
+            print("Odeslán tah, čekám na potvrzení...")
         else:
-            print("⚠️ Není tvůj tah, nemůžeš hrát.")
+            print("Není tvůj tah, nemůžeš hrát.")

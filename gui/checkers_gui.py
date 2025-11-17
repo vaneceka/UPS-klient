@@ -110,7 +110,7 @@ class CheckersGUI:
 
         if not self.selected:
             piece = self.board[r][c]
-            # ✅ Povolit i výběr dámy (3 a 4)
+            # Povolit i výběr dámy (3 a 4)
             if (self.my_color == "WHITE" and piece in (WHITE, 3)) or \
             (self.my_color == "BLACK" and piece in (BLACK, 4)):
                 self.selected = (r, c)
@@ -138,7 +138,7 @@ class CheckersGUI:
         parts = board_message.strip().split()
         values = parts[1:]
         if len(values) < 64:
-            print("⚠️ BOARD nekompletní:", board_message)
+            print("BOARD nekompletní:", board_message)
             return
 
         # Převeď data do 8x8 matice
@@ -149,7 +149,7 @@ class CheckersGUI:
         self.update_board()
 
     def handle_server_message(self, message: str):
-        print("📩 [GUI] Server:", message)
+        print("[GUI] Server:", message)
 
         if message.startswith("BOARD"):
             self.update_from_server(message)
@@ -159,32 +159,39 @@ class CheckersGUI:
                 color = parts[1].upper()
                 text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
                 self.turn_label.config(text=text)
-                self.my_turn = (color == self.my_color)  # ✅ tvůj tah
+                self.my_turn = (color == self.my_color)  
 
         elif message.startswith("GAME_OVER"):
             parts = message.strip().split()
-            result_text = "🎯 Konec hry!"
+            result_text = "Konec hry!"
             color = None
 
             if "WIN" in parts:
+                if "DISCONNECT" in parts:
+                    result_text = "Soupeř se odpojil – vyhrál jsi!"
+                    color = "green"
                 if "WHITE" in parts:
-                    result_text = "🎉 Vyhrály bílé!"
+                    result_text = "Vyhrály bílé!"
                     color = "green"
                 elif "BLACK" in parts:
-                    result_text = "🎉 Vyhrály černé!"
+                    result_text = "Vyhrály černé!"
                     color = "green"
                 else:
-                    result_text = "🎉 Vyhrál jsi!"
+                    result_text = "Vyhrál jsi!"
                     color = "green"
             elif "LOSE" in parts:
-                result_text = "💀 Prohrál jsi!"
+                result_text = "Prohrál jsi!"
                 color = "red"
+            elif message.startswith("ERROR"):
+                err = message.split(" ", 1)[1].strip() if " " in message else "Neznámá chyba"
+                from tkinter import messagebox
+                messagebox.showwarning("Chybný tah", err)
 
             self.turn_label.config(text=result_text, fg=color)
             self.my_turn = False  # vypne možnost hrát
             self.in_game = False
 
-            # 💬 otevři Game Over okno
+            # otevři Game Over okno
             self.show_game_over_screen(result_text)
 
     def show_game_over_screen(self, result_text):
@@ -199,7 +206,7 @@ class CheckersGUI:
         win.resizable(False, False)
 
         center_window(win, 350, 280)
-        # 🏁 Výsledek
+        # Výsledek
         label = tk.Label(
             win,
             text=result_text,
@@ -209,7 +216,7 @@ class CheckersGUI:
         )
         label.pack(pady=25)
 
-        # 🔁 Hrát znovu (jen pokud má smysl)
+        # Hrát znovu (jen pokud má smysl)
         StyledButton(
             win,
             text="🔁 Hrát znovu",
@@ -218,7 +225,7 @@ class CheckersGUI:
             command=lambda: self.restart_to_lobby(win)
         ).pack(pady=6)
 
-        # 🚪 Ukončit hru
+        # Ukončit hru
         StyledButton(
             win,
             text="🚪 Ukončit hru",
