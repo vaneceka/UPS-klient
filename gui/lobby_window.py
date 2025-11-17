@@ -81,8 +81,7 @@ class LobbyWindow:
         root_game.title("Dáma")
 
         # Předáme jméno hráče do hry
-        gui = CheckersGUI(root_game, my_color=my_color, my_name=self.name, opponent_name=opponent_name)
-        gui.network = self.client
+        gui = CheckersGUI(root_game, my_color=my_color, my_name=self.name, opponent_name=opponent_name, network=self.client)
 
         # Přesměruj zprávy na GUI hry
         self.client.on_message_callback = gui.handle_server_message

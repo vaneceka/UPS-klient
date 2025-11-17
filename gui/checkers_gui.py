@@ -1,5 +1,6 @@
 import tkinter as tk
 from gui.utils import center_window
+from network import NetworkClient
 
 WHITE = 1
 BLACK = 2
@@ -15,7 +16,7 @@ CELL_SIZE = 80  # velikost jednoho políčka (px)
 BOARD_SIZE = 8
 
 class CheckersGUI:
-    def __init__(self, root, my_color="WHITE", my_name = "?", opponent_name = "?"):
+    def __init__(self, root, my_color="WHITE", my_name = "?", opponent_name = "?", network: "NetworkClient | None" = None):
         self.root = root
         self.root.title("Dáma")
         center_window(root, 680, 690)
@@ -24,6 +25,7 @@ class CheckersGUI:
         self.my_color = my_color
         self.my_name = my_name
         self.opponent_name = opponent_name
+        self.network = network
 
         # Horní informační panel
         top_frame = tk.Frame(self.root)
@@ -102,7 +104,7 @@ class CheckersGUI:
 
     def on_click(self, event):
         if not getattr(self, "my_turn", False):
-            print("⏳ Není tvůj tah!")
+            print("Není tvůj tah!")
             return
 
         c = event.x // CELL_SIZE
@@ -134,7 +136,7 @@ class CheckersGUI:
         )
 
     def update_from_server(self, board_message: str):
-        """Aktualizuje hrací desku podle zprávy BOARD ..."""
+        """Aktualizuje hrací desku podle zprávy BOARD"""
         parts = board_message.strip().split()
         values = parts[1:]
         if len(values) < 64:
