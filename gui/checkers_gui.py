@@ -166,12 +166,6 @@ class CheckersGUI:
             self.update_from_server(message)
 
         elif message.startswith("TURN"):
-            # parts = message.strip().split()
-            # if len(parts) >= 2:
-            #     color = parts[1].upper()
-            #     text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
-            #     self.turn_label.config(text=text)
-            #     self.my_turn = (color == self.my_color)  
             self.handle_turn_message(message)
 
         elif message.startswith("OPPONENT_DISCONNECTED"):
