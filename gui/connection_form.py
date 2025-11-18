@@ -84,7 +84,7 @@ class ConnectionForm:
             return
 
         # pošli identifikaci
-        client.send(f"HELLO NICK {name}")
+        # client.send(f"HELLO NICK {name}")
         self.open_lobby(client, name)
 
     def handle_server_message(self, message):
