@@ -181,33 +181,7 @@ class CheckersGUI:
             self.turn_label.config(text="Soupeř se připojil zpět", fg="green")
 
         elif message.startswith("GAME_OVER"):
-            parts = message.strip().split()
-            result_text = "Konec hry!"
-            color = None
-
-            if "WIN" in parts:
-                if "DISCONNECT" in parts:
-                    result_text = "Soupeř se odpojil – vyhrál jsi!"
-                    color = "green"
-                if "WHITE" in parts:
-                    result_text = "Vyhrály bílé!"
-                    color = "green"
-                elif "BLACK" in parts:
-                    result_text = "Vyhrály černé!"
-                    color = "green"
-                else:
-                    result_text = "Vyhrál jsi!"
-                    color = "green"
-            elif "LOSE" in parts:
-                result_text = "Prohrál jsi!"
-                color = "red"
-
-            self.turn_label.config(text=result_text, fg=color)
-            self.my_turn = False  # vypne možnost hrát
-            self.in_game = False
-
-            # otevři Game Over okno
-            self.show_game_over_screen(result_text)
+            self.handle_game_over(message)
 
         elif message.startswith("ERROR"):
                 err = message.split(" ", 1)[1].strip() if " " in message else "Neznámá chyba"
@@ -292,3 +266,32 @@ class CheckersGUI:
             text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
             self.turn_label.config(text=text)
             self.my_turn = (color == self.my_color)  
+    
+    def handle_game_over(self, message):
+        parts = message.strip().split()
+        result_text = "Konec hry!"
+        color = None
+
+        if "WIN" in parts:
+            if "DISCONNECT" in parts:
+                result_text = "Soupeř se odpojil – vyhrál jsi!"
+                color = "green"
+            if "WHITE" in parts:
+                result_text = "Vyhrály bílé!"
+                color = "green"
+            elif "BLACK" in parts:
+                result_text = "Vyhrály černé!"
+                color = "green"
+            else:
+                result_text = "Vyhrál jsi!"
+                color = "green"
+        elif "LOSE" in parts:
+            result_text = "Prohrál jsi!"
+            color = "red"
+
+        self.turn_label.config(text=result_text, fg=color)
+        self.my_turn = False  # vypne možnost hrát
+        self.in_game = False
+
+        # otevři Game Over okno
+        self.show_game_over_screen(result_text)
