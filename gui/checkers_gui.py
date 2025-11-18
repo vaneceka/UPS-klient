@@ -164,13 +164,21 @@ class CheckersGUI:
 
         if message.startswith("BOARD"):
             self.update_from_server(message)
+
         elif message.startswith("TURN"):
-            parts = message.strip().split()
-            if len(parts) >= 2:
-                color = parts[1].upper()
-                text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
-                self.turn_label.config(text=text)
-                self.my_turn = (color == self.my_color)  
+            # parts = message.strip().split()
+            # if len(parts) >= 2:
+            #     color = parts[1].upper()
+            #     text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
+            #     self.turn_label.config(text=text)
+            #     self.my_turn = (color == self.my_color)  
+            self.handle_turn_message(message)
+
+        elif message.startswith("OPPONENT_DISCONNECTED"):
+            self.turn_label.config(text="Soupeř se odpojil, čekám...", fg="orange")
+
+        elif message.startswith("OPPONENT_RECONNECTED"):
+            self.turn_label.config(text="Soupeř se připojil zpět", fg="green")
 
         elif message.startswith("GAME_OVER"):
             parts = message.strip().split()
@@ -193,10 +201,6 @@ class CheckersGUI:
             elif "LOSE" in parts:
                 result_text = "Prohrál jsi!"
                 color = "red"
-            elif message.startswith("ERROR"):
-                err = message.split(" ", 1)[1].strip() if " " in message else "Neznámá chyba"
-                from tkinter import messagebox
-                messagebox.showwarning("Chybný tah", err)
 
             self.turn_label.config(text=result_text, fg=color)
             self.my_turn = False  # vypne možnost hrát
@@ -204,6 +208,11 @@ class CheckersGUI:
 
             # otevři Game Over okno
             self.show_game_over_screen(result_text)
+
+        elif message.startswith("ERROR"):
+                err = message.split(" ", 1)[1].strip() if " " in message else "Neznámá chyba"
+                from tkinter import messagebox
+                messagebox.showwarning("Chybný tah", err)
 
     def show_game_over_screen(self, result_text):
         """Zobrazí okno s výsledkem hry a tlačítky StyledButton."""
@@ -275,3 +284,11 @@ class CheckersGUI:
             pass
         # zavři hlavní herní okno
         self.root.destroy()
+    
+    def handle_turn_message(self, message):
+        parts = message.strip().split()
+        if len(parts) >= 2:
+            color = parts[1].upper()
+            text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
+            self.turn_label.config(text=text)
+            self.my_turn = (color == self.my_color)  
