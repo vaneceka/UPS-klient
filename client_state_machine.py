@@ -19,18 +19,17 @@ class ClientStateMachine:
 
     def handle_message(self, message):
         """Zpracování zpráv ze serveru podle aktuálního stavu."""
-        print(f"[STATE {self.state.name}] ⬅️ {message}")
+        print(f"[STATE {self.state.name}] {message}")
 
         if message.startswith("WELCOME"):
             self.to_lobby()
 
         elif message.startswith("GAME_START"):
-            # např. GAME_START COLOR WHITE
             parts = message.split()
             if len(parts) >= 3:
                 self.color = parts[2]
             self.state = ClientState.WHITE_MOVE if self.color == "WHITE" else ClientState.WAITING
-            print(f"🎮 Hra začala, barva: {self.color}")
+            print(f"Hra začala, barva: {self.color}")
 
         elif message.startswith("BOARD"):
             # aktualizuj hrací pole v GUI
@@ -41,7 +40,7 @@ class ClientStateMachine:
                 self.state = ClientState.WHITE_MOVE
             else:
                 self.state = ClientState.BLACK_MOVE
-            print("🎯 Na tahu jsi ty!")
+            print("Na tahu jsi ty!")
 
         elif message.startswith("OPPONENT_MOVE"):
             # druhý hráč udělal tah → aktualizuj GUI
@@ -54,11 +53,11 @@ class ClientStateMachine:
 
         elif message.startswith("DISCONNECT"):
             self.state = ClientState.DISCONNECTED
-            print("❌ Server ukončil spojení")
+            print("Server ukončil spojení")
 
     def to_lobby(self):
         self.state = ClientState.LOBBY
-        print("🏠 Vstoupil jsi do lobby")
+        print("Vstoupil jsi do lobby")
 
     def play_game(self):
         """Odešle žádost o start hry."""
