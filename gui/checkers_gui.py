@@ -267,10 +267,11 @@ class CheckersGUI:
         result_text = "Konec hry!"
         color = None
 
-        if "WIN" in parts:
-            if "DISCONNECT" in parts:
+        if "DISCONNECT_TIMEOUT" in parts:
                 result_text = "Soupeř se odpojil – vyhrál jsi!"
                 color = "green"
+
+        if "WIN" in parts:
             if "WHITE" in parts:
                 result_text = "Vyhrály bílé!"
                 color = "green"
