@@ -182,7 +182,7 @@ class CheckersGUI:
                 from tkinter import messagebox
                 messagebox.showwarning("Chybný tah", err)
 
-    def show_game_over_screen(self, result_text):
+    def show_game_over_screen(self, result_text, color):
         """Zobrazí okno s výsledkem hry a tlačítky StyledButton."""
         from gui.styled_button import StyledButton 
         from gui.utils import center_window
@@ -200,7 +200,7 @@ class CheckersGUI:
             text=result_text,
             font=("Arial", 16, "bold"),
             bg="#F5F5F5",
-            fg="green" if "Vyhrál" in result_text or "🎉" in result_text else "red"
+            fg=color
         )
         label.pack(pady=25)
 
@@ -267,11 +267,11 @@ class CheckersGUI:
         result_text = "Konec hry!"
         color = None
 
-        if "DISCONNECT_TIMEOUT" in parts:
-                result_text = "Soupeř se odpojil – vyhrál jsi!"
-                color = "green"
+        if "WIN" in parts and "DISCONNECT_TIMEOUT" in parts:
+            result_text = "Soupeř se odpojil – vyhrál jsi!"
+            color = "green"
 
-        if "WIN" in parts:
+        elif "WIN" in parts:
             if "WHITE" in parts:
                 result_text = "Vyhrály bílé!"
                 color = "green"
@@ -290,4 +290,4 @@ class CheckersGUI:
         self.in_game = False
 
         # otevři Game Over okno
-        self.show_game_over_screen(result_text)
+        self.show_game_over_screen(result_text, "green")
