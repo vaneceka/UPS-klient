@@ -68,8 +68,12 @@ class NetworkClient:
                 print(f"Chyba při odesílání: {e}")
 
     def close(self):
-        """Ukončí spojení."""
         self.running = False
         if self.sock:
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
             self.sock.close()
+        self.sock = None
         print("Odpojeno od serveru.")

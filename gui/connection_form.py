@@ -131,12 +131,24 @@ class ConnectionForm:
 
         elif message.startswith("ERROR NICK_IN_USE"):
             messagebox.showerror("Chyba", "Přezdívka je již používána.")
-            self.client.close()
+
+            if self.client:
+                try:
+                    self.client.close()   # ← opravdu uzavře socket
+                except:
+                    pass
+
             self.client = None
+            return
+
+        elif message.startswith("GAME_OVER YOU_CAN_PLAY_AGAIN"):
+            print("Reconnect potvrzen -> přecházím do lobby")
+            self.open_lobby(self.client, self.name)
 
         if self.lobby_window:
             self.lobby_window.handle_server_message(message)
             return
+        
         
        
             
