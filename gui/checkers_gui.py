@@ -1,4 +1,5 @@
 import tkinter as tk
+import sys
 from gui.utils import center_window
 from network import NetworkClient
 
@@ -257,16 +258,24 @@ class CheckersGUI:
             pass
         self.root.destroy()
 
+    import sys
+
     def on_window_close(self):
-        """Zachytí klik na křížek v herním okně."""
         try:
-            # pošli BYE jen pokud jsme stále „ve hře“
-            if getattr(self, "in_game", False) and hasattr(self, "network"):
-                self.network.send("BYE\n")
-        except Exception:
+            if self.network:
+                self.network.send("BYE")
+                self.network.close()
+        except:
             pass
-        # zavři hlavní herní okno
-        self.root.destroy()
+
+        # Zavře celé GUI včetně hlavního root
+        try:
+            self.root.quit()
+            self.root.destroy()
+        except:
+            pass
+
+        sys.exit(0)
     
     def handle_turn_message(self, message):
         parts = message.strip().split()

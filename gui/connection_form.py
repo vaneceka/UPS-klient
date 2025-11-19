@@ -16,6 +16,8 @@ class ConnectionForm:
         self.client = None
         self.name = None
         
+        self.root.protocol("WM_DELETE_WINDOW", self.quit_app)
+
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")
         self.root.geometry("350x280")
@@ -159,3 +161,12 @@ class ConnectionForm:
             widget.destroy()
         self.root.geometry("350x250")
         self.lobby_window = LobbyWindow(self.root, client, name)
+
+    def quit_app(self):
+        try:
+            if self.client:
+                self.client.send("BYE")
+                self.client.close()
+        except:
+            pass
+        self.root.destroy()

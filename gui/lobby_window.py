@@ -1,4 +1,5 @@
 import tkinter as tk
+import sys
 from tkinter import messagebox
 from gui.checkers_gui import CheckersGUI
 from gui.styled_button import StyledButton
@@ -31,10 +32,10 @@ class LobbyWindow:
         self.disconnect_button = StyledButton(root, text="Odhlásit se",
                                               bg_color="#E53935",
                                               hover_color="#C62828",
-                                              command=self.disconnect)
+                                              command=self.exit_app)
         self.disconnect_button.pack(pady=(5, 10))
 
-        self.root.protocol("WM_DELETE_WINDOW", self.disconnect)
+        self.root.protocol("WM_DELETE_WINDOW", self.exit_app)
 
         # Po připojení poslouchej zprávy ze serveru
         self.client.on_message_callback = self.handle_server_message
@@ -94,11 +95,12 @@ class LobbyWindow:
         # Přesměruj zprávy na GUI hry
         self.client.on_message_callback = gui.handle_server_message
 
-    def disconnect(self):
+    def exit_app(self):
         try:
-            self.client.send("BYE\n")
-            self.client.close()
-        except Exception:
+            if self.network:
+                self.network.send("BYE")
+                self.network.close()
+        except:
             pass
         self.root.destroy()
-        # messagebox.showinfo("Odhlášení", "Byl jsi odpojen od serveru.")
+        sys.exit(0)
