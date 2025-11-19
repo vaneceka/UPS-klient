@@ -27,32 +27,38 @@ class CheckersGUI:
         self.opponent_name = opponent_name
         self.network = network
 
-        # Horní informační panel
         top_frame = tk.Frame(self.root)
         top_frame.pack(fill="x", pady=4)
 
-        # Levá strana
-        self.info_label = tk.Label(
-            top_frame,
-            text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper() == 'WHITE' else 'ČERNÉ'}",
-            font=("Arial", 12)
-        )
+        top_frame.columnconfigure(0, weight=1)
+        top_frame.columnconfigure(1, weight=10)
+        top_frame.columnconfigure(2, weight=1)
+
+        # --- LEFT FRAME ---
+        left = tk.Frame(top_frame)
+        left.grid(row=0, column=0, sticky="w")
+
+        self.info_label = tk.Label(left, text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper()=='WHITE' else 'ČERNÉ'}", font=("Arial", 12))
         self.info_label.pack(side="left", padx=8)
 
-        # Pravá strana – soupeř
-        self.opponent_label = tk.Label(
+        # --- CENTER – ERROR ---
+        self.error_label = tk.Label(
             top_frame,
-            text=f"Hraješ proti: {self.opponent_name}",
-            font=("Arial", 12,)
-        )
-        self.opponent_label.pack(side="right", padx=10)
-        
-        self.turn_label = tk.Label(
-            top_frame,
-            text="Čekám na server...",
+            text="",
+            fg="red",
             font=("Arial", 12)
         )
-        self.turn_label.pack(side="right", padx=8)
+        self.error_label.grid(row=0, column=1, sticky="n")
+
+        # --- RIGHT FRAME ---
+        right = tk.Frame(top_frame)
+        right.grid(row=0, column=2, sticky="e")
+
+        self.turn_label = tk.Label(right, text="Na tahu:", font=("Arial", 12))
+        self.turn_label.pack(side="right", padx=(0, 10))
+
+        self.opponent_label = tk.Label(right, text=f"Hraješ proti: {self.opponent_name}", font=("Arial", 12))
+        self.opponent_label.pack(side="right", padx=8)
 
 
         self.canvas = tk.Canvas(self.root, width=8*CELL_SIZE, height=8*CELL_SIZE)
@@ -178,9 +184,18 @@ class CheckersGUI:
             self.handle_game_over(message)
 
         elif message.startswith("ERROR"):
-                err = message.split(" ", 1)[1].strip() if " " in message else "Neznámá chyba"
-                from tkinter import messagebox
-                messagebox.showwarning("Chybný tah", err)
+            err = message.split(" ", 1)[1].strip() if " " in message else "Neznámá chyba"
+
+            # Reset výběru
+            self.selected = None
+            self.canvas.delete("highlight")
+
+            # Zobraz chybu jako text
+            self.error_label.config(text=f"Chyba: {err}")
+
+            # Auto-hide za 2 sekundy
+            self.root.after(2000, lambda: self.error_label.config(text=""))
+            return
 
     def show_game_over_screen(self, result_text, color):
         """Zobrazí okno s výsledkem hry a tlačítky StyledButton."""
@@ -281,13 +296,21 @@ class CheckersGUI:
             else:
                 result_text = "Vyhrál jsi!"
                 color = "green"
+            
         elif "LOSE" in parts:
-            result_text = "Prohrál jsi!"
-            color = "red"
+            if "WHITE" in parts:
+                result_text = "Prohrál jsi! Vyhrály černé"
+                color = "red"
+            elif "BLACK" in parts:
+                result_text = "Prohrál jsi! Vyhrály bílé"
+                color = "red"
+            else:
+                result_text = "Prohrál jsi!"
+                color = "red"
 
         self.turn_label.config(text=result_text, fg=color)
         self.my_turn = False  # vypne možnost hrát
         self.in_game = False
 
         # otevři Game Over okno
-        self.show_game_over_screen(result_text, "green")
+        self.show_game_over_screen(result_text, color)
