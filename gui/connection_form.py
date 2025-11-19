@@ -8,8 +8,14 @@ from gui.utils import center_window
 class ConnectionForm:
     def __init__(self, root):
         self.root = root
+
+        self.game_window = None
+        self.lobby_window = None
+        self.nickname = None
+
         self.client = None
         self.name = None
+        
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")
         self.root.geometry("350x280")
@@ -86,12 +92,41 @@ class ConnectionForm:
             return
 
         self.name = name
+        self.client.nickname = name
         self.client.send(f"HELLO NICK {self.name}")
 
 
     def handle_server_message(self, message):
         print("Server:", message)
+
+        # ===== Reconnect: GAME_START ještě v ConnectionForm =====
+        if message.startswith("GAME_START"):
+            parts = message.split()
+            my_color = parts[2]
+            opponent = parts[4]
+
+            # otevřít herní okno přímo z ConnectionForm
+            root_game = tk.Toplevel(self.root)
+            from gui.checkers_gui import CheckersGUI
+            gui = CheckersGUI(
+                root_game,
+                my_color=my_color,
+                my_name=self.name,
+                opponent_name=opponent,
+                network=self.client
+            )
+
+            # předáme klientovi nový callback
+            self.client.on_message_callback = gui.handle_server_message
+
+            # zavřeme ConnectionForm
+            self.root.withdraw()
+            return
+
+
+        # --- přihlášení ---
         if message.startswith("WELCOME"):
+            self.nickname = self.name
             self.open_lobby(self.client, self.name)
 
         elif message.startswith("ERROR NICK_IN_USE"):
@@ -99,10 +134,16 @@ class ConnectionForm:
             self.client.close()
             self.client = None
 
+        if self.lobby_window:
+            self.lobby_window.handle_server_message(message)
+            return
+        
+       
+            
 
     def open_lobby(self, client, name):
         """Vyčistí aktuální obsah a zobrazí lobby ve stejném okně"""
         for widget in self.root.winfo_children():
             widget.destroy()
         self.root.geometry("350x250")
-        LobbyWindow(self.root, client, name)
+        self.lobby_window = LobbyWindow(self.root, client, name)

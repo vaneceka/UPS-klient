@@ -49,6 +49,12 @@ class LobbyWindow:
     def handle_server_message(self, message):
         print("Server:", message)
 
+        if not getattr(self, "lobby_active", True):
+            # už nejsem v lobby - přeposlat zprávu rovnou GUI hry
+            if hasattr(self, "game_window"):
+                self.game_window.handle_server_message(message)
+            return
+
         if message.startswith("WAIT"):
             self.status_label.config(text="Čekám na druhého hráče...")
 
@@ -77,6 +83,7 @@ class LobbyWindow:
     def start_game(self, my_color,opponent_name):
         """Skryje lobby a otevře herní okno"""
         self.root.withdraw()
+        self.lobby_active = False     # <- přidat
 
         root_game = tk.Toplevel(self.root)
         root_game.title("Dáma")
