@@ -38,7 +38,7 @@ class LobbyWindow:
 
         # Po připojení poslouchej zprávy ze serveru
         self.client.on_message_callback = self.handle_server_message
-        self.client.send(f"HELLO NICK {self.name}")
+        
 
     def play(self):
         """Pošli požadavek na zahájení hry (jen jednou)"""

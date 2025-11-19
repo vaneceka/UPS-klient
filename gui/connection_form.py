@@ -8,6 +8,8 @@ from gui.utils import center_window
 class ConnectionForm:
     def __init__(self, root):
         self.root = root
+        self.client = None
+        self.name = None
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")
         self.root.geometry("350x280")
@@ -78,17 +80,25 @@ class ConnectionForm:
             return
 
         # připojení k serveru
-        client = NetworkClient(host, port, on_message_callback=self.handle_server_message)
-        if not client.connect():
+        self.client = NetworkClient(host, port, on_message_callback=self.handle_server_message)
+        if not self.client.connect():
             messagebox.showerror("Chyba", "Nepodařilo se připojit k serveru.")
             return
 
-        # pošli identifikaci
-        # client.send(f"HELLO NICK {name}")
-        self.open_lobby(client, name)
+        self.name = name
+        self.client.send(f"HELLO NICK {self.name}")
+
 
     def handle_server_message(self, message):
         print("Server:", message)
+        if message.startswith("WELCOME"):
+            self.open_lobby(self.client, self.name)
+
+        elif message.startswith("ERROR NICK_IN_USE"):
+            messagebox.showerror("Chyba", "Přezdívka je již používána.")
+            self.client.close()
+            self.client = None
+
 
     def open_lobby(self, client, name):
         """Vyčistí aktuální obsah a zobrazí lobby ve stejném okně"""
