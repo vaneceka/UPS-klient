@@ -31,7 +31,7 @@ class CheckersGUI:
         top_frame.pack(fill="x", pady=4)
 
         top_frame.columnconfigure(0, weight=1)
-        top_frame.columnconfigure(1, weight=10)
+        top_frame.columnconfigure(1, weight=1)
         top_frame.columnconfigure(2, weight=1)
 
         # --- LEFT FRAME ---
@@ -48,7 +48,7 @@ class CheckersGUI:
             fg="red",
             font=("Arial", 12)
         )
-        self.error_label.grid(row=0, column=1, sticky="n")
+        self.error_label.place(relx=0.5, rely=0.5, anchor="center")
 
         # --- RIGHT FRAME ---
         right = tk.Frame(top_frame)
