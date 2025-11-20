@@ -8,16 +8,12 @@ from gui.utils import center_window
 class ConnectionForm:
     def __init__(self, root):
         self.root = root
-
         self.game_window = None
         self.lobby_window = None
         self.nickname = None
-
         self.client = None
         self.name = None
-        
         self.root.protocol("WM_DELETE_WINDOW", self.quit_app)
-
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")
         self.root.geometry("350x280")
@@ -32,6 +28,7 @@ class ConnectionForm:
             main_frame, text="Přezdívka:", font=("Arial", 13),
             bg="#F5F5F5", fg="#333"
         ).pack(anchor="center", pady=(10, 3))
+        
         self.entry_name = tk.Entry(
             main_frame, font=("Arial", 13),
             bg="white", fg="black", bd=2, relief="groove", insertbackground="black"

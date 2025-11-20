@@ -257,8 +257,9 @@ class CheckersGUI:
         except Exception:
             pass
         self.root.destroy()
+        sys.exit(0)
 
-    import sys
+    
 
     def on_window_close(self):
         try:
