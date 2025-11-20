@@ -9,13 +9,13 @@ class AppController:
     def __init__(self):
         self.root = tk.Tk()
 
-        self.client = None           # NetworkClient
-        self.current_window = None   # ConnectionForm / LobbyWindow / CheckersGUI
+        self.client = None # NetworkClient
+        self.current_window = None # ConnectionForm / LobbyWindow / CheckersGUI
         self.nickname = None
 
         self.show_connection_form()
 
-    # ---------------- WINDOW MANAGEMENT ----------------
+    # Window management
     def show_connection_form(self):
         self.root.deiconify()
         self._clear_window()
@@ -27,7 +27,6 @@ class AppController:
         self.current_window = LobbyWindow(self.root, self.client, nickname, controller=self)
 
     def show_game(self, color, my_name, opponent):
-        # self.current_window.root.destroy()  # zavři lobby
         self.root.withdraw()
         win = tk.Toplevel(self.root)
         self.current_window = CheckersGUI(
@@ -44,7 +43,7 @@ class AppController:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-    # ---------------- NETWORK ----------------
+    # Network
     def connect(self, host, port, nickname) -> bool:
         self.nickname = nickname
         self.client = NetworkClient(
@@ -62,7 +61,7 @@ class AppController:
         self.client.send(f"HELLO NICK {nickname}")
         return True
 
-    # ---------------- ROUTING SERVER → OKNO ----------------
+    # Routing mezi okny
     def _handle_message(self, message: str):
         print("[Controller] Received:", message)
 

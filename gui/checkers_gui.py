@@ -1,7 +1,7 @@
 import tkinter as tk
 import sys
 from gui.utils import center_window
-from network import NetworkClient
+from gui.game_over_window import GameOverWindow
 
 WHITE = 1
 BLACK = 2
@@ -215,46 +215,6 @@ class CheckersGUI:
             # Auto-hide za 2 sekundy
             self.root.after(2000, lambda: self.error_label.config(text=""))
             return
-
-    def show_game_over_screen(self, result_text, color):
-        """Zobrazí okno s výsledkem hry a tlačítky StyledButton."""
-        from gui.styled_button import StyledButton 
-        from gui.utils import center_window
-
-
-        win = tk.Toplevel(self.root)
-        win.title("Konec hry")
-        win.configure(bg="#F5F5F5")
-        win.resizable(False, False)
-
-        center_window(win, 350, 280)
-        # Výsledek
-        label = tk.Label(
-            win,
-            text=result_text,
-            font=("Arial", 16, "bold"),
-            bg="#F5F5F5",
-            fg=color
-        )
-        label.pack(pady=25)
-
-        # Hrát znovu (jen pokud má smysl)
-        StyledButton(
-            win,
-            text="Hrát znovu",
-            bg_color="#4CAF50",
-            hover_color="#45A049",
-            command=lambda: self.restart_to_lobby(win)
-        ).pack(pady=6)
-
-        # Ukončit hru
-        StyledButton(
-            win,
-            text="Ukončit hru",
-            bg_color="#E53935",
-            hover_color="#C62828",
-            command=lambda: self.quit_game(win)
-        ).pack(pady=6)
         
     def restart_to_lobby(self, win):
         win.destroy()
@@ -333,4 +293,10 @@ class CheckersGUI:
         self.in_game = False
 
         # otevři Game Over okno
-        self.show_game_over_screen(result_text, color)
+        GameOverWindow(
+            parent=self.root,
+            result_text=result_text,
+            color=color,
+            on_restart=self.restart_to_lobby,
+            on_quit=self.quit_game
+        )

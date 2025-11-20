@@ -99,7 +99,6 @@ class ConnectionForm:
             messagebox.showerror("Chyba", "Nepodařilo se připojit k serveru.")
             return
 
-        # uložíme, aby show_lobby věděl, jak se jmenuješ
         self.name = name
         self.client = self.controller.client
 
