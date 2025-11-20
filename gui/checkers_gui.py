@@ -22,12 +22,20 @@ class CheckersGUI:
         self.root.title("Dáma")
         center_window(root, 680, 690)
         self.root.protocol("WM_DELETE_WINDOW", self.on_window_close)
+
         self.in_game = True
         self.my_color = my_color
         self.my_name = my_name
         self.opponent_name = opponent_name
         self.network = network
+        self.selected = None
+        self.board = [[EMPTY for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
 
+        self._build_top_panel()
+        self._build_board_canvas()
+        self.draw_board()
+
+    def _build_top_panel(self):
         top_frame = tk.Frame(self.root)
         top_frame.pack(fill="x", pady=4)
 
@@ -35,14 +43,18 @@ class CheckersGUI:
         top_frame.columnconfigure(1, weight=1)
         top_frame.columnconfigure(2, weight=1)
 
-        # --- LEFT FRAME ---
+        # LEFT
         left = tk.Frame(top_frame)
         left.grid(row=0, column=0, sticky="w")
 
-        self.info_label = tk.Label(left, text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper()=='WHITE' else 'ČERNÉ'}", font=("Arial", 12))
+        self.info_label = tk.Label(
+            left,
+            text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper() == 'WHITE' else 'ČERNÉ'}",
+            font=("Arial", 12)
+        )
         self.info_label.pack(side="left", padx=8)
 
-        # --- CENTER – ERROR ---
+        # CENTER (error)
         self.error_label = tk.Label(
             top_frame,
             text="",
@@ -51,22 +63,27 @@ class CheckersGUI:
         )
         self.error_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # --- RIGHT FRAME ---
+        # RIGHT
         right = tk.Frame(top_frame)
         right.grid(row=0, column=2, sticky="e")
 
         self.turn_label = tk.Label(right, text="Na tahu:", font=("Arial", 12))
         self.turn_label.pack(side="right", padx=(0, 10))
 
-        self.opponent_label = tk.Label(right, text=f"Hraješ proti: {self.opponent_name}", font=("Arial", 12))
+        self.opponent_label = tk.Label(
+            right,
+            text=f"Hraješ proti: {self.opponent_name}",
+            font=("Arial", 12)
+        )
         self.opponent_label.pack(side="right", padx=8)
-
-
-        self.canvas = tk.Canvas(self.root, width=8*CELL_SIZE, height=8*CELL_SIZE)
+    
+    def _build_board_canvas(self):
+        self.canvas = tk.Canvas(
+            self.root,
+            width=BOARD_SIZE * CELL_SIZE,
+            height=BOARD_SIZE * CELL_SIZE
+        )
         self.canvas.pack()
-        self.board = [[EMPTY for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
-        self.selected = None
-        self.draw_board()
         self.canvas.bind("<Button-1>", self.on_click)
 
     def draw_board(self):
