@@ -17,8 +17,9 @@ CELL_SIZE = 80  # velikost jednoho políčka (px)
 BOARD_SIZE = 8
 
 class CheckersGUI:
-    def __init__(self, root, my_color="WHITE", my_name = "?", opponent_name = "?", network: "NetworkClient | None" = None):
+    def __init__(self, root, controller, my_color="WHITE", my_name="?", opponent_name="?", network=None):
         self.root = root
+        self.controller = controller
         self.root.title("Dáma")
         center_window(root, 680, 690)
         self.root.protocol("WM_DELETE_WINDOW", self.on_window_close)
@@ -240,7 +241,7 @@ class CheckersGUI:
         # Hrát znovu (jen pokud má smysl)
         StyledButton(
             win,
-            text="🔁 Hrát znovu",
+            text="Hrát znovu",
             bg_color="#4CAF50",
             hover_color="#45A049",
             command=lambda: self.restart_to_lobby(win)
@@ -249,22 +250,15 @@ class CheckersGUI:
         # Ukončit hru
         StyledButton(
             win,
-            text="🚪 Ukončit hru",
+            text="Ukončit hru",
             bg_color="#E53935",
             hover_color="#C62828",
             command=lambda: self.quit_game(win)
         ).pack(pady=6)
         
     def restart_to_lobby(self, win):
-        """Vrátí hráče zpět do lobby (ve stejném okně)."""
-        from gui.lobby_window import LobbyWindow
         win.destroy()
-
-        # Vyčisti hlavní okno hry
-        for widget in self.root.winfo_children():
-            widget.destroy()
-
-        LobbyWindow(self.root, self.network, self.my_name)
+        self.controller.show_lobby(self.my_name)
 
     def quit_game(self, win):
         """Odpojí hráče a zavře aplikaci."""
@@ -276,7 +270,6 @@ class CheckersGUI:
         self.root.destroy()
         sys.exit(0)
 
-    
 
     def on_window_close(self):
         try:
