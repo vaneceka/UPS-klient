@@ -40,7 +40,6 @@ class ConnectionForm:
     def handle_server_message(self, message):
         print("Server:", message)
 
-        # ===== Reconnect: GAME_START ještě v ConnectionForm =====
         if message.startswith("GAME_START"):
             return self._handle_game_start(message)
 
