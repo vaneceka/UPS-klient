@@ -192,6 +192,15 @@ class CheckersGUI:
 
         elif message.startswith("TURN"):
             self.handle_turn_message(message)
+        
+        elif message.startswith("UPDATE"):
+            self.handle_update(message)
+
+        elif message.startswith("CAPTURE"):
+            self.handle_capture(message)
+
+        elif message.startswith("PROMOTION"):
+            self.handle_promotion(message)
 
         elif message.startswith("OPPONENT_DISCONNECTED"):
             self.turn_label.config(text="Soupeř se odpojil, čekám...", fg="orange")
@@ -255,8 +264,36 @@ class CheckersGUI:
             text = "Na tahu: BÍLÉ" if color == "WHITE" else "Na tahu: ČERNÉ"
             self.turn_label.config(text=text, fg="#ffffff")
             self.turn_label.config(text=text)
-            self.my_turn = (color == self.my_color)  
+            self.my_turn = (color == self.my_color) 
+
+    def handle_update(self, message):
+        # UPDATE fr fc tr tc
+        parts = message.strip().split()
+        fr, fc, tr, tc = map(int, parts[1:5])
+
+        piece = self.board[fr][fc]
+        self.board[fr][fc] = 0
+        self.board[tr][tc] = piece
+
+        self.update_board() 
+
+    def handle_capture(self, message):
+        # CAPTURE r c
+        parts = message.strip().split()
+        r, c = map(int, parts[1:3])
+
+        self.board[r][c] = 0
+        self.update_board()
+
+    def handle_promotion(self, message):
+        # PROMOTION r c new_type
+        parts = message.strip().split()
+        r, c, new_type = map(int, parts[1:4])
+
+        self.board[r][c] = new_type
+        self.update_board()
     
+
     def handle_game_over(self, message):
         parts = message.strip().split()
         result_text = "Konec hry!"
