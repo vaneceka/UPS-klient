@@ -13,7 +13,6 @@ COLORS = {
     "highlight": "#FFD700"
 }
 
-CELL_SIZE = 80  # velikost jednoho políčka (px)
 BOARD_SIZE = 8
 
 class CheckersGUI:
@@ -34,7 +33,7 @@ class CheckersGUI:
 
         self._build_top_panel()
         self._build_board_canvas()
-        self.draw_board()
+        self.root.after(0, self.redraw_board)
 
     def _build_top_panel(self):
         top_frame = tk.Frame(self.root)
@@ -79,80 +78,113 @@ class CheckersGUI:
         self.opponent_label.pack(side="right", padx=8)
     
     def _build_board_canvas(self):
-        self.canvas = tk.Canvas(
-            self.root,
-            width=BOARD_SIZE * CELL_SIZE,
-            height=BOARD_SIZE * CELL_SIZE
-        )
-        self.canvas.pack()
+        self.canvas = tk.Canvas(self.root, bg="#2b2b2b")  # tmavě šedá
+        self.canvas.pack(expand=True, fill="both")
+
+        self.canvas.bind("<Configure>", self.redraw_board)
         self.canvas.bind("<Button-1>", self.on_click)
 
-    def draw_board(self):
-        """Vykreslí celou šachovnici"""
-        for r in range(8):
-            for c in range(8):
+    def redraw_board(self, event=None):
+        self.canvas.delete("all")
+
+        w = self.canvas.winfo_width()
+        h = self.canvas.winfo_height()
+        if w <= 1 or h <= 1:
+            return  # ještě není pořádně změřeno
+
+        size = min(w, h)
+        self.cell = size // BOARD_SIZE
+
+        self.offset_x = (w - size) // 2
+        self.offset_y = (h - size) // 2
+
+        for r in range(BOARD_SIZE):
+            for c in range(BOARD_SIZE):
+                x1 = self.offset_x + c * self.cell
+                y1 = self.offset_y + r * self.cell
+                x2 = x1 + self.cell
+                y2 = y1 + self.cell
+
                 color = COLORS["board_dark"] if (r + c) % 2 else COLORS["board_light"]
-                x1, y1 = c * CELL_SIZE, r * CELL_SIZE
-                x2, y2 = x1 + CELL_SIZE, y1 + CELL_SIZE
                 self.canvas.create_rectangle(x1, y1, x2, y2, fill=color, outline="black")
 
-        self.update_board()
+        self.draw_pieces()
 
-    def update_board(self):
-        """Vykreslí figurky"""
+    def draw_pieces(self):
+        if not hasattr(self, "cell"):
+            return  # ještě jsme neredrawovali desku
+
         self.canvas.delete("piece")
-        for r in range(8):
-            for c in range(8):
+
+        for r in range(BOARD_SIZE):
+            for c in range(BOARD_SIZE):
                 piece = self.board[r][c]
-                if piece != 0:
-                    x = c * CELL_SIZE + CELL_SIZE / 2
-                    y = r * CELL_SIZE + CELL_SIZE / 2
-                    radius = CELL_SIZE * 0.35
+                if piece == EMPTY:
+                    continue
 
-                    # Barvy figurky
-                    color = "white" if piece in (1, 3) else "black"
-                    outline = "gold" if piece in (3, 4) else "gray"
+                x = self.offset_x + c * self.cell + self.cell / 2
+                y = self.offset_y + r * self.cell + self.cell / 2
+                radius = self.cell * 0.35
 
-                    # Nakresli ovál
-                    self.canvas.create_oval(
-                        x - radius, y - radius, x + radius, y + radius,
-                        fill=color, outline=outline, width=3, tags="piece"
+                color = "white" if piece in (1, 3) else "black"
+                outline = "gold" if piece in (3, 4) else "gray"
+
+                self.canvas.create_oval(
+                    x - radius, y - radius, x + radius, y + radius,
+                    fill=color, outline=outline, width=3, tags="piece"
+                )
+
+                if piece in (3, 4):
+                    self.canvas.create_text(
+                        x, y, text="♛",
+                        font=("Arial", int(self.cell * 0.4), "bold"),
+                        fill="gold" if piece == 3 else "white",
+                        tags="piece"
                     )
-
-                    # Pokud je to dáma, přidej korunku
-                    if piece in (3, 4):
-                        self.canvas.create_text(
-                            x, y, text="♛", font=("Arial", 20, "bold"),
-                            fill="gold" if piece == 3 else "white",
-                            tags="piece"
-                        )
 
     def on_click(self, event):
         if not getattr(self, "my_turn", False):
             print("Není tvůj tah!")
             return
 
-        c = event.x // CELL_SIZE
-        r = event.y // CELL_SIZE
+        if not hasattr(self, "cell"):
+            return
+
+        # klik mimo desku → ignore
+        if event.x < self.offset_x or event.y < self.offset_y:
+            return
+        if event.x >= self.offset_x + self.cell * 8:
+            return
+        if event.y >= self.offset_y + self.cell * 8:
+            return
+
+        c = (event.x - self.offset_x) // self.cell
+        r = (event.y - self.offset_y) // self.cell
+
+        r = int(r)
+        c = int(c)
 
         if not self.selected:
             piece = self.board[r][c]
-            # Povolit i výběr dámy (3 a 4)
             if (self.my_color == "WHITE" and piece in (WHITE, 3)) or \
             (self.my_color == "BLACK" and piece in (BLACK, 4)):
                 self.selected = (r, c)
                 self.highlight_square(r, c)
         else:
             from_row, from_col = self.selected
-            # Pošli tah serveru
             self.network.send(f"MOVE {from_row} {from_col} {r} {c}")
             self.selected = None
             self.canvas.delete("highlight")
-        
-
+            
     def highlight_square(self, r, c):
-        x1, y1 = c * CELL_SIZE, r * CELL_SIZE
-        x2, y2 = x1 + CELL_SIZE, y1 + CELL_SIZE
+        if not hasattr(self, "cell"):
+            return
+
+        x1 = self.offset_x + c * self.cell
+        y1 = self.offset_y + r * self.cell
+        x2 = x1 + self.cell
+        y2 = y1 + self.cell
+
         self.canvas.create_rectangle(
             x1, y1, x2, y2,
             outline=COLORS["highlight"],
@@ -182,7 +214,8 @@ class CheckersGUI:
             board.append(row)
 
         self.board = board
-        self.update_board()
+        # self.update_board()
+        self.draw_pieces() 
 
     def handle_server_message(self, message: str):
         print("[GUI] Server:", message)
@@ -275,7 +308,7 @@ class CheckersGUI:
         self.board[fr][fc] = 0
         self.board[tr][tc] = piece
 
-        self.update_board() 
+        self.draw_pieces()
 
     def handle_capture(self, message):
         # CAPTURE r c
@@ -283,7 +316,7 @@ class CheckersGUI:
         r, c = map(int, parts[1:3])
 
         self.board[r][c] = 0
-        self.update_board()
+        self.draw_pieces()
 
     def handle_promotion(self, message):
         # PROMOTION r c new_type
