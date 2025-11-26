@@ -325,7 +325,7 @@ class CheckersGUI:
         r, c, new_type = map(int, parts[1:4])
 
         self.board[r][c] = new_type
-        self.update_board()
+        self.draw_pieces()
     
 
     def handle_game_over(self, message):
