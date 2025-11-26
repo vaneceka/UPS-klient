@@ -73,6 +73,10 @@ class AppController:
         if message.startswith("ERROR NICK_IN_USE"):
             if hasattr(self.current_window, "on_nick_in_use"):
                 return self.current_window.on_nick_in_use()
+        
+        if message.startswith("ERROR INVALID_NICK"):
+            self.current_window.on_invalid_nick()
+            return
 
         # Začátek hry
         if message.startswith("GAME_START"):

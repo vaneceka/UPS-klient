@@ -53,7 +53,7 @@ class ConnectionForm:
         )
         self.entry_host.pack(ipadx=5, ipady=3, pady=(0, 10))
         # self.entry_host.insert(0, "127.0.0.1") 
-        self.entry_host.insert(0, "192.168.2.2") 
+        self.entry_host.insert(0, "192.168.2.1") 
 
         # Port
         tk.Label(
@@ -94,7 +94,7 @@ class ConnectionForm:
         except ValueError:
             messagebox.showerror("Chyba", "Port musí být číslo.")
             return
-
+        
         success = self.controller.connect(host, port, name)
         if not success:
             messagebox.showerror("Chyba", "Nepodařilo se připojit k serveru.")
@@ -109,6 +109,17 @@ class ConnectionForm:
 
     def on_nick_in_use(self):
         messagebox.showerror("Chyba", "Přezdívka je již používána.")
+    
+    def on_invalid_nick(self):
+        messagebox.showerror("Chyba", "Neplatná přezdívka!")
+        self.connect_button.config(state="normal")
+        try:
+            if self.client:
+                self.client.close()
+        except:
+            pass
+
+        self.client = None
 
     def handle_server_message(self, message: str):
         # ConnectionForm už nic dalšího neřeší
