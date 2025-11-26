@@ -12,7 +12,6 @@ class AppController:
         self.client = None # NetworkClient
         self.current_window = None # ConnectionForm / LobbyWindow / CheckersGUI
         self.nickname = None
-
         self.show_connection_form()
 
     # Window management
@@ -52,6 +51,8 @@ class AppController:
             on_message_callback=self._handle_message,
             root=self.root
         )
+
+        self.client.on_disconnect = self.on_disconnect
 
         if not self.client.connect():
             self.client = None
@@ -96,3 +97,7 @@ class AppController:
 
     def run(self):
         self.root.mainloop()
+
+    def on_disconnect(self):
+        # zavřít lobby okno a vrátit ConnectionForm
+        self.show_connection_form()

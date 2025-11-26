@@ -10,12 +10,10 @@ class NetworkClient:
         self.sock = None
         self.running = False
         self.on_message_callback = on_message_callback
+        self.on_disconnect = None
         self.root = root
         self.lock = threading.Lock()  # chrání socket
 
-    # -----------------------------
-    # Pomocné funkce
-    # -----------------------------
     def recv_all(self, length):
         """Přečte přesně 'length' bajtů nebo vrátí None."""
         data = b""
@@ -41,9 +39,6 @@ class NetworkClient:
         except Exception as e:
             print("Chyba při odesílání:", e)
 
-    # -----------------------------
-    # Veřejné API
-    # -----------------------------
     def connect(self):
         if self.running:
             print("Už jsem připojen → ignoruji connect()")
@@ -96,7 +91,14 @@ class NetworkClient:
                 print("Chyba při čtení:", e)
                 break
 
+        self.running = False
         self.close()
+
+        if hasattr(self, 'on_disconnect') and self.on_disconnect:
+            if self.root:
+                self.root.after(0, self.on_disconnect)
+            else:
+                self.on_disconnect()
 
     def send(self, message: str):
         """Veřejné posílání zpráv (užívá nový protokol)."""
