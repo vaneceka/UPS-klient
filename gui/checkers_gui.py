@@ -78,7 +78,9 @@ class CheckersGUI:
         self.opponent_label.pack(side="right", padx=8)
     
     def _build_board_canvas(self):
-        self.canvas = tk.Canvas(self.root, bg="#2b2b2b")  # tmavě šedá
+        # self.canvas = tk.Canvas(self.root, bg="#2b2b2b")  # tmavě šedá
+        system_bg = self.root.cget("bg")  # převezme barvu okna
+        self.canvas = tk.Canvas(self.root, bg=system_bg, highlightthickness=0)
         self.canvas.pack(expand=True, fill="both")
 
         self.canvas.bind("<Configure>", self.redraw_board)
