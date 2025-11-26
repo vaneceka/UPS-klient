@@ -52,7 +52,8 @@ class ConnectionForm:
             relief="groove", insertbackground="black"
         )
         self.entry_host.pack(ipadx=5, ipady=3, pady=(0, 10))
-        self.entry_host.insert(0, "127.0.0.1")
+        # self.entry_host.insert(0, "127.0.0.1") 
+        self.entry_host.insert(0, "192.168.2.2") 
 
         # Port
         tk.Label(
