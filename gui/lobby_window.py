@@ -68,7 +68,6 @@ class LobbyWindow:
     def _bind_events(self):
         self.root.protocol("WM_DELETE_WINDOW", self.exit_app)
 
-    # ============ LOGIKA ============
     def play(self):
         self.play_button.disable()
         self.client.send("PLAY")

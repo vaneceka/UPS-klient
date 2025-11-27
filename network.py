@@ -14,8 +14,9 @@ class NetworkClient:
         self.root = root
         self.lock = threading.Lock()  # chrání socket
 
+
+    # Přečte přesně 'length' bajtů nebo vrátí None.
     def recv_all(self, length):
-        """Přečte přesně 'length' bajtů nebo vrátí None."""
         data = b""
         while len(data) < length:
             try:
@@ -27,8 +28,8 @@ class NetworkClient:
             data += chunk
         return data
 
+    # Pošle length-prefixed packet.
     def send_packet(self, msg: str):
-        """Pošle length-prefixed packet."""
         if not self.running:
             return
         try:
@@ -41,7 +42,7 @@ class NetworkClient:
 
     def connect(self):
         if self.running:
-            print("Už jsem připojen → ignoruji connect()")
+            print("Už jsem připojen.")
             return False
 
         try:
@@ -58,16 +59,17 @@ class NetworkClient:
             self.running = False
             return False
 
+    # Čte length-prefixed zprávy od serveru.
     def listen(self):
-        """Čte length-prefixed zprávy od serveru."""
         while self.running:
             try:
                 header = self.recv_all(4)
                 if not header:
                     print("Spojení ukončeno (header).")
                     break
-
-                (length,) = struct.unpack("!I", header)
+                
+                struct = struct.unpack("!I", header)
+                length = struct[0]
 
                 if length == 0 or length > 65536:
                     print("Neplatná délka:", length)
@@ -99,14 +101,14 @@ class NetworkClient:
                 self.root.after(0, self.on_disconnect)
             else:
                 self.on_disconnect()
-
+    
+    # Veřejné posílání zpráv (užívá nový protokol).
     def send(self, message: str):
-        """Veřejné posílání zpráv (užívá nový protokol)."""
         print("[SEND] ", message)
         self.send_packet(message)
 
+    # Bezpečné zavření socketu.
     def close(self):
-        """Bezpečné zavření socketu."""
         if not self.running:
             return
 

@@ -24,25 +24,25 @@ class StyledButton(tk.Label):
         self.bind("<Leave>", lambda e: self._on_hover(False))
         self.bind("<Button-1>", lambda e: self._on_click())
 
+    #Změna barvy při najetí, jen pokud je aktivní
     def _on_hover(self, is_entering):
-        """Změna barvy při najetí, jen pokud je aktivní"""
         if not self.enabled:
             return
         self.config(bg=self.hover_bg if is_entering else self.default_bg)
 
+    #Kliknutí - volá command jen pokud je aktivní
     def _on_click(self):
-        """Kliknutí — volá command jen pokud je aktivní"""
         if not self.enabled:
             return
         if self.command:
             self.command()
 
+    #Zneaktivní tlačítko
     def disable(self):
-        """Zneaktivní tlačítko"""
         self.enabled = False
         self.config(bg="#888", cursor="arrow")
 
+    #Znovu aktivuje tlačítko
     def enable(self):
-        """Znovu aktivuje tlačítko"""
         self.enabled = True
         self.config(bg=self.default_bg, cursor="hand2")

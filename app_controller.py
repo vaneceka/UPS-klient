@@ -58,7 +58,6 @@ class AppController:
             self.client = None
             return False
 
-        # HELLO pošle controller, ne ConnectionForm
         self.client.send(f"HELLO NICK {nickname}")
         return True
 
@@ -66,7 +65,6 @@ class AppController:
     def _handle_message(self, message: str):
         print("[Controller] Received:", message)
 
-        # Přihlášení
         if message.startswith("WELCOME"):
             if hasattr(self.current_window, "on_welcome"):
                 return self.current_window.on_welcome()
@@ -83,7 +81,6 @@ class AppController:
             if hasattr(self.current_window, "on_server_full"):
                 return self.current_window.on_server_full()
 
-        # Začátek hry
         if message.startswith("GAME_START"):
             parts = message.split()
             color = parts[2]
@@ -95,13 +92,13 @@ class AppController:
         if message.startswith("GAME_OVER YOU_CAN_PLAY_AGAIN"):
             return self.show_lobby(self.nickname)
 
-        # Všechno ostatní pošli aktuálnímu oknu (Lobby / CheckersGUI)
+        # Všechno ostatní se pošle aktuálnímu oknu(Lobby / CheckersGUI)
         if hasattr(self.current_window, "handle_server_message"):
             self.current_window.handle_server_message(message)
 
     def run(self):
         self.root.mainloop()
 
+    # zavřít lobby okno a vrátit ConnectionForm
     def on_disconnect(self):
-        # zavřít lobby okno a vrátit ConnectionForm
         self.show_connection_form()
