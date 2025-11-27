@@ -5,13 +5,6 @@ from gui.utils import center_window
 
 class GameOverWindow:
     def __init__(self, parent, result_text, color, on_restart, on_quit):
-        """
-        :param parent: rodičovské okno (CheckersGUI.root)
-        :param result_text: text výsledku (např. 'Vyhrál jsi!')
-        :param color: barva textu (zelená / červená)
-        :param on_restart: callback funkce pro tlačítko 'Hrát znovu'
-        :param on_quit: callback funkce pro tlačítko 'Ukončit hru'
-        """
         self.win = tk.Toplevel(parent)
         self.win.title("Konec hry")
         self.win.configure(bg="#F5F5F5")

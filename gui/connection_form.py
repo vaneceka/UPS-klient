@@ -15,7 +15,7 @@ class ConnectionForm:
         self._init_window()
         self._build_ui()
 
-    # ============ UI ============
+    # UI
     def _init_window(self):
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")
@@ -79,7 +79,6 @@ class ConnectionForm:
         )
         self.connect_button.pack(pady=(15, 10))
 
-    # ============ LOGIKA ============
     def connect(self):
         name = self.entry_name.get().strip()
         host = self.entry_host.get().strip()
@@ -103,7 +102,7 @@ class ConnectionForm:
         self.name = name
         self.client = self.controller.client
 
-    # Tyhle metody volá controller:
+    # Metody pro kontrolér
     def on_welcome(self):
         self.controller.show_lobby(self.name)
 
@@ -132,7 +131,6 @@ class ConnectionForm:
         self.connect_button.config(state="normal")
 
     def handle_server_message(self, message: str):
-        # ConnectionForm už nic dalšího neřeší
         print("[ConnectionForm] Ignoruju:", message)
 
     def quit_app(self):

@@ -5,6 +5,8 @@ from gui.game_over_window import GameOverWindow
 
 WHITE = 1
 BLACK = 2
+WHITE_KING = 3
+BLACK_KING = 4
 EMPTY = 0
 
 COLORS = {
@@ -26,10 +28,15 @@ class CheckersGUI:
         self.in_game = True
         self.my_color = my_color
         self.my_name = my_name
+        self.my_turn = False
         self.opponent_name = opponent_name
         self.network = network
         self.selected = None
         self.board = [[EMPTY for _ in range(BOARD_SIZE)] for _ in range(BOARD_SIZE)]
+
+        self.cell = None
+        self.offset_x = 0
+        self.offset_y = 0
 
         self._build_top_panel()
         self._build_board_canvas()
@@ -78,20 +85,22 @@ class CheckersGUI:
         self.opponent_label.pack(side="right", padx=8)
     
     def _build_board_canvas(self):
-        system_bg = self.root.cget("bg")  # převezme barvu okna
+        system_bg = self.root.cget("bg") 
         self.canvas = tk.Canvas(self.root, bg=system_bg, highlightthickness=0)
         self.canvas.pack(expand=True, fill="both")
 
         self.canvas.bind("<Configure>", self.redraw_board)
         self.canvas.bind("<Button-1>", self.on_click)
 
+    # Při změně velikosti okna, se hra překreslí
     def redraw_board(self, event=None):
         self.canvas.delete("all")
 
         w = self.canvas.winfo_width()
         h = self.canvas.winfo_height()
+        # ještě není pořádně změřeno
         if w <= 1 or h <= 1:
-            return  # ještě není pořádně změřeno
+            return  
 
         size = min(w, h)
         self.cell = size // BOARD_SIZE
@@ -111,9 +120,11 @@ class CheckersGUI:
 
         self.draw_pieces()
 
+    # Vykreslení figurek
     def draw_pieces(self):
-        if not hasattr(self, "cell"):
-            return  # ještě jsme neredrawovali desku
+        # pokud je spočítaná velikost pole pokračuj
+        if not self.cell:
+            return
 
         self.canvas.delete("piece")
 
@@ -127,31 +138,31 @@ class CheckersGUI:
                 y = self.offset_y + r * self.cell + self.cell / 2
                 radius = self.cell * 0.35
 
-                color = "white" if piece in (1, 3) else "black"
-                outline = "gold" if piece in (3, 4) else "gray"
+                color = "white" if piece in (WHITE, WHITE_KING) else "black"
+                outline = "gold" if piece in (WHITE_KING, BLACK_KING) else "gray"
 
                 self.canvas.create_oval(
                     x - radius, y - radius, x + radius, y + radius,
                     fill=color, outline=outline, width=3, tags="piece"
                 )
 
-                if piece in (3, 4):
+                if piece in (WHITE_KING, BLACK_KING):
                     self.canvas.create_text(
                         x, y, text="♛",
                         font=("Arial", int(self.cell * 0.4), "bold"),
-                        fill="gold" if piece == 3 else "white",
+                        fill="gold" if piece == WHITE_KING else "white",
                         tags="piece"
                     )
 
     def on_click(self, event):
-        if not getattr(self, "my_turn", False):
+        if not self.my_turn:
             print("Není tvůj tah!")
             return
 
-        if not hasattr(self, "cell"):
+        if not self.cell:
             return
 
-        # klik mimo desku → ignore
+        # klik mimo desku -> ignorujeme
         if event.x < self.offset_x or event.y < self.offset_y:
             return
         if event.x >= self.offset_x + self.cell * 8:
@@ -162,21 +173,24 @@ class CheckersGUI:
         c = (event.x - self.offset_x) // self.cell
         r = (event.y - self.offset_y) // self.cell
 
-        r = int(r)
         c = int(c)
+        r = int(r)
 
+        # Pokud není zatím žádná figurka vybrána
         if not self.selected:
             piece = self.board[r][c]
-            if (self.my_color == "WHITE" and piece in (WHITE, 3)) or \
-            (self.my_color == "BLACK" and piece in (BLACK, 4)):
+            if (self.my_color == "WHITE" and piece in (WHITE, WHITE_KING)) or \
+            (self.my_color == "BLACK" and piece in (BLACK, BLACK_KING)):
                 self.selected = (r, c)
                 self.highlight_square(r, c)
+        # Pokud mám vybranou figurku -> tah
         else:
             from_row, from_col = self.selected
             self.network.send(f"MOVE {from_row} {from_col} {r} {c}")
             self.selected = None
             self.canvas.delete("highlight")
-            
+    
+    # Zvýrazní vybranou figurku
     def highlight_square(self, r, c):
         if not hasattr(self, "cell"):
             return
@@ -201,7 +215,7 @@ class CheckersGUI:
             print("Nekompletní BOARD:", board_message)
             return
 
-        values = parts[1:65]  # přesně 64 čísel jako stringy
+        values = parts[1:65]
 
         board = []
         index = 0
@@ -215,7 +229,6 @@ class CheckersGUI:
             board.append(row)
 
         self.board = board
-        # self.update_board()
         self.draw_pieces() 
 
     def handle_server_message(self, message: str):
