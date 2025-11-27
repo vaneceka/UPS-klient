@@ -68,8 +68,7 @@ class NetworkClient:
                     print("Spojení ukončeno (header).")
                     break
                 
-                struct = struct.unpack("!I", header)
-                length = struct[0]
+                (length,) = struct.unpack("!I", header)
 
                 if length == 0 or length > 65536:
                     print("Neplatná délka:", length)
