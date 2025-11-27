@@ -79,6 +79,10 @@ class AppController:
             self.current_window.on_invalid_nick()
             return
 
+        if message.startswith("ERROR SERVER_FULL"):
+            if hasattr(self.current_window, "on_server_full"):
+                return self.current_window.on_server_full()
+
         # Začátek hry
         if message.startswith("GAME_START"):
             parts = message.split()

@@ -121,6 +121,16 @@ class ConnectionForm:
 
         self.client = None
 
+    def on_server_full(self):
+        messagebox.showerror("Server plný", "Kapacita serveru je plná. Zkuste to prosím později.")
+        try:
+            if self.client:
+                self.client.close()
+        except:
+            pass
+        self.client = None
+        self.connect_button.config(state="normal")
+
     def handle_server_message(self, message: str):
         # ConnectionForm už nic dalšího neřeší
         print("[ConnectionForm] Ignoruju:", message)
