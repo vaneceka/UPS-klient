@@ -1,3 +1,5 @@
+import threading
+import time
 import tkinter as tk
 from network import NetworkClient
 from gui.connection_form import ConnectionForm
@@ -5,13 +7,21 @@ from gui.lobby_window import LobbyWindow
 from gui.checkers_gui import CheckersGUI
 
 
+RECONNECT_TIMEOUT = 15    
+RECONNECT_RETRY_DELAY = 1  
+
 class AppController:
     def __init__(self):
         self.root = tk.Tk()
 
+        self.server_host = None
+        self.server_port = None
         self.client = None # NetworkClient
         self.current_window = None # ConnectionForm / LobbyWindow / CheckersGUI
         self.nickname = None
+
+        self.reconnecting = False 
+        
         self.show_connection_form()
 
     # Window management
@@ -45,6 +55,8 @@ class AppController:
     # Network
     def connect(self, host, port, nickname) -> bool:
         self.nickname = nickname
+        self.server_host = host       
+        self.server_port = port 
         self.client = NetworkClient(
             host,
             port,
@@ -100,5 +112,59 @@ class AppController:
         self.root.mainloop()
 
     # zavřít lobby okno a vrátit ConnectionForm
+    # def on_disconnect(self):
+    #     self.show_connection_form()
+
     def on_disconnect(self):
-        self.show_connection_form()
+        """Volá se z NetworkClientu, když spojení spadne."""
+        print("Odpojeno od serveru – zkouším reconnect...")
+
+        # pokud už reconnect běží, nic dalšího nepouštěj
+        if self.reconnecting:
+            return
+
+        self.reconnecting = True
+
+        # reconnect pustíme ve vedlejším vlákně, aby neblokoval Tkinter
+        threading.Thread(target=self._reconnect_loop, daemon=True).start()
+
+        def _reconnect_loop(self):
+            """Pokouší se reconnectnout na server během RECONNECT_TIMEOUT sekund."""
+            # pokud nevíme, kam jsme byli připojeni, nemá cenu reconnectovat
+            if not self.server_host or not self.server_port or not self.nickname:
+                print("Nemám info o serveru/nicku, jdu zpět na ConnectionForm.")
+                self.reconnecting = False
+                self.root.after(0, self.show_connection_form)
+                return
+
+            start = time.time()
+
+            while time.time() - start < RECONNECT_TIMEOUT:
+                try:
+                    print("Zkouším nové připojení...")
+
+                    new_client = NetworkClient(
+                        self.server_host,
+                        self.server_port,
+                        on_message_callback=self._handle_message,
+                        root=self.root
+                    )
+                    new_client.on_disconnect = self.on_disconnect
+
+                    if new_client.connect():
+                        print("Reconnect OK, posílám HELLO NICK...")
+                        # přepneme se na nového klienta
+                        self.client = new_client
+                        self.client.send(f"HELLO NICK {self.nickname}\n")
+                        # dál už se vše řeší v _handle_message (GAME_START / GAME_OVER)
+                        self.reconnecting = False
+                        return
+
+                except Exception as e:
+                    print("Chyba při reconnectu:", e)
+
+                time.sleep(RECONNECT_RETRY_DELAY)
+
+            print("Reconnect se nepodařil včas, vracím do ConnectionForm.")
+            self.reconnecting = False
+            self.root.after(0, self.show_connection_form)

@@ -111,10 +111,29 @@ class NetworkClient:
         self.send_packet(message)
 
     # Bezpečné zavření socketu.
-    def close(self):
-        if not self.running:
-            return
+    # def close(self):
+    #     if not self.running:
+    #         return
 
+    #     self.running = False
+
+    #     if self.sock:
+    #         try:
+    #             with self.lock:
+    #                 self.sock.shutdown(socket.SHUT_RDWR)
+    #         except:
+    #             pass
+
+    #         try:
+    #             self.sock.close()
+    #         except:
+    #             pass
+
+    #     self.sock = None
+    #     print("Odpojeno od serveru.")
+
+    def close(self):
+        # klidně zavírej i když self.running je False
         self.running = False
 
         if self.sock:
