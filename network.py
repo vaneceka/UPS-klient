@@ -73,14 +73,18 @@ class NetworkClient:
                 if length == 0 or length > 65536:
                     print("Neplatná délka:", length)
                     break
-
+                    
                 payload = self.recv_all(length)
                 if not payload:
                     print("Spojení ukončeno (payload).")
                     break
-
+                
                 message = payload.decode("utf-8")
                 print("[RECV] ", message)
+
+                if message.strip() == "PING":
+                    self.send("PONG\n")
+                    continue
 
                 if self.on_message_callback:
                     if self.root:
