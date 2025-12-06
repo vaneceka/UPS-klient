@@ -60,7 +60,6 @@ class CheckersGUI:
             left,
             text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper() == 'WHITE' else 'ČERNÉ'}",
             font=("Arial", 12),
-            fg = "white",
             bg=BG_COLOR,
             fg = BG_COLOR
         )
@@ -231,7 +230,11 @@ class CheckersGUI:
         for _ in range(8):
             row = []
             for _ in range(8):
-                row.append(int(values[index]))
+                try:
+                    row.append(int(values[index]))
+                except ValueError:
+                    print("Nečíselná hodnota v BOARD:", values[index])
+                    return
                 index += 1
             board.append(row)
 
@@ -323,7 +326,19 @@ class CheckersGUI:
     def handle_update(self, message):
         # UPDATE fr fc tr tc
         parts = message.strip().split()
-        fr, fc, tr, tc = map(int, parts[1:5])
+        
+        if len(parts) != 5:
+            print("Neplatná UPDATE zpráva:", message)
+            return
+        
+        try:
+            fr = int(parts[1])
+            fc = int(parts[2])
+            tr = int(parts[3])
+            tc = int(parts[4])
+        except ValueError:
+            print("Nečíselné souřadnice v UPDATE:", message)
+            return
 
         piece = self.board[fr][fc]
         self.board[fr][fc] = 0
@@ -334,16 +349,35 @@ class CheckersGUI:
     def handle_capture(self, message):
         # CAPTURE r c
         parts = message.strip().split()
-        r, c = map(int, parts[1:3])
+
+        if len(parts) != 3:
+            print("Neplatná CAPTURE zpráva:", message)
+            return
+        try:
+            r = int(parts[1])
+            c = int(parts[2])
+        except ValueError:
+            print("Nečíselné souřadnice v CAPTURE:", message)
+            return
 
         self.board[r][c] = 0
         self.draw_pieces()
 
     def handle_promotion(self, message):
-        # PROMOTION r c new_type
+        # promoce r c new_type
         parts = message.strip().split()
-        r, c, new_type = map(int, parts[1:4])
-
+        
+        if len(parts) != 4:
+            print("Neplatná PROMOTION zpráva:", message)
+            return
+        try:
+            r = int(parts[1])
+            c = int(parts[2])
+            new_type = int(parts[3])
+        except ValueError:
+            print("Nečíselné hodnoty v PROMOTION:", message)
+            return
+        
         self.board[r][c] = new_type
         self.draw_pieces()
     
@@ -380,7 +414,7 @@ class CheckersGUI:
                 color = "red"
 
         self.turn_label.config(text=result_text, fg=color)
-        self.my_turn = False  # vypne možnost hrát
+        self.my_turn = False 
         self.in_game = False
 
         # otevři Game Over okno

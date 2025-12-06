@@ -12,7 +12,7 @@ class NetworkClient:
         self.on_message_callback = on_message_callback
         self.on_disconnect = None
         self.root = root
-        self.lock = threading.Lock()  # chrání socket
+        self.lock = threading.Lock() 
 
 
     # Přečte přesně 'length' bajtů nebo vrátí None.
@@ -110,30 +110,7 @@ class NetworkClient:
         print("[SEND] ", message)
         self.send_packet(message)
 
-    # Bezpečné zavření socketu.
-    # def close(self):
-    #     if not self.running:
-    #         return
-
-    #     self.running = False
-
-    #     if self.sock:
-    #         try:
-    #             with self.lock:
-    #                 self.sock.shutdown(socket.SHUT_RDWR)
-    #         except:
-    #             pass
-
-    #         try:
-    #             self.sock.close()
-    #         except:
-    #             pass
-
-    #     self.sock = None
-    #     print("Odpojeno od serveru.")
-
     def close(self):
-        # klidně zavírej i když self.running je False
         self.running = False
 
         if self.sock:
