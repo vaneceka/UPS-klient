@@ -36,6 +36,12 @@ class AppController:
         self.current_window = LobbyWindow(self.root, self.client, nickname, controller=self)
 
     def show_game(self, color, my_name, opponent):
+        if isinstance(self.current_window, CheckersGUI):
+            try:
+                self.current_window.root.destroy()
+            except Exception:
+                pass
+
         self.root.withdraw()
         win = tk.Toplevel(self.root)
         self.current_window = CheckersGUI(
@@ -110,10 +116,6 @@ class AppController:
 
     def run(self):
         self.root.mainloop()
-
-    # zavřít lobby okno a vrátit ConnectionForm
-    # def on_disconnect(self):
-    #     self.show_connection_form()
 
     def on_disconnect(self):
         """Volá se z NetworkClientu, když spojení spadne."""

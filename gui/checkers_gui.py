@@ -60,8 +60,8 @@ class CheckersGUI:
             left,
             text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper() == 'WHITE' else 'ČERNÉ'}",
             font=("Arial", 12),
-            bg=BG_COLOR,
-            fg = BG_COLOR
+            bg= BG_COLOR,
+            fg = "white"
         )
         self.info_label.pack(side="left", padx=8)
 
