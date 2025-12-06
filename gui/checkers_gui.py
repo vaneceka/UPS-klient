@@ -387,7 +387,14 @@ class CheckersGUI:
         result_text = "Konec hry!"
         color = None
 
-        if "WIN" in parts and "DISCONNECT_TIMEOUT" in parts:
+        if "DRAW" in parts:
+            if "NO_MOVES" in parts:
+                result_text = "Remíza – hráč na tahu už neměl žádný možný tah."
+            else:
+                result_text = "Partie skončila remízou."
+            color = "orange"
+
+        elif "WIN" in parts and "DISCONNECT_TIMEOUT" in parts:
             result_text = "Soupeř se odpojil – vyhrál jsi!"
             color = "green"
 
