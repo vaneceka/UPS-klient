@@ -16,12 +16,14 @@ COLORS = {
 }
 
 BOARD_SIZE = 8
+BG_COLOR = "#3a3a3a"
 
 class CheckersGUI:
     def __init__(self, root, controller, my_color="WHITE", my_name="?", opponent_name="?", network=None):
         self.root = root
         self.controller = controller
         self.root.title("Dáma")
+        self.root.configure(bg=BG_COLOR) 
         center_window(root, 680, 690)
         self.root.protocol("WM_DELETE_WINDOW", self.on_window_close)
 
@@ -43,7 +45,7 @@ class CheckersGUI:
         self.root.after(0, self.redraw_board)
 
     def _build_top_panel(self):
-        top_frame = tk.Frame(self.root)
+        top_frame = tk.Frame(self.root, bg=BG_COLOR)
         top_frame.pack(fill="x", pady=4)
 
         top_frame.columnconfigure(0, weight=1)
@@ -51,13 +53,16 @@ class CheckersGUI:
         top_frame.columnconfigure(2, weight=1)
 
         # LEFT
-        left = tk.Frame(top_frame)
+        left = tk.Frame(top_frame, bg=BG_COLOR)
         left.grid(row=0, column=0, sticky="w")
 
         self.info_label = tk.Label(
             left,
             text=f"Hraješ za: {'BÍLÉ' if self.my_color.upper() == 'WHITE' else 'ČERNÉ'}",
-            font=("Arial", 12)
+            font=("Arial", 12),
+            fg = "white",
+            bg=BG_COLOR,
+            fg = BG_COLOR
         )
         self.info_label.pack(side="left", padx=8)
 
@@ -66,27 +71,29 @@ class CheckersGUI:
             top_frame,
             text="",
             fg="red",
-            font=("Arial", 12)
+            font=("Arial", 12),
+            bg = BG_COLOR
         )
         self.error_label.place(relx=0.5, rely=0.5, anchor="center")
 
         # RIGHT
-        right = tk.Frame(top_frame)
+        right = tk.Frame(top_frame,bg=BG_COLOR)
         right.grid(row=0, column=2, sticky="e")
 
-        self.turn_label = tk.Label(right, text="Na tahu:", font=("Arial", 12))
+        self.turn_label = tk.Label(right, text="Na tahu:", font=("Arial", 12), bg=BG_COLOR, fg="white")
         self.turn_label.pack(side="right", padx=(0, 10))
 
         self.opponent_label = tk.Label(
             right,
             text=f"Hraješ proti: {self.opponent_name}",
-            font=("Arial", 12)
+            font=("Arial", 12),
+            bg=BG_COLOR,
+            fg="white"
         )
         self.opponent_label.pack(side="right", padx=8)
     
     def _build_board_canvas(self):
-        system_bg = self.root.cget("bg") 
-        self.canvas = tk.Canvas(self.root, bg=system_bg, highlightthickness=0)
+        self.canvas = tk.Canvas(self.root, bg=BG_COLOR, highlightthickness=0)
         self.canvas.pack(expand=True, fill="both")
 
         self.canvas.bind("<Configure>", self.redraw_board)
