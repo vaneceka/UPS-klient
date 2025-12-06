@@ -192,7 +192,7 @@ class CheckersGUI:
         # Pokud mám vybranou figurku -> tah
         else:
             from_row, from_col = self.selected
-            self.network.send(f"MOVE {from_row} {from_col} {r} {c}")
+            self.network.send(f"MOVE {from_row} {from_col} {r} {c}\n")
             self.selected = None
             self.canvas.delete("highlight")
     
@@ -300,7 +300,7 @@ class CheckersGUI:
     def on_window_close(self):
         try:
             if self.network:
-                self.network.send("BYE")
+                self.network.send("BYE\n")
                 self.network.close()
         except:
             pass

@@ -70,7 +70,7 @@ class LobbyWindow:
 
     def play(self):
         self.play_button.disable()
-        self.client.send("PLAY")
+        self.client.send("PLAY\n")
         self.status_label.config(text="Čekám na druhého hráče...")
 
     def handle_server_message(self, message: str):
@@ -84,7 +84,7 @@ class LobbyWindow:
     def exit_app(self):
         try:
             if self.client:
-                self.client.send("BYE")
+                self.client.send("BYE\n")
                 self.client.close()
         except Exception:
             pass

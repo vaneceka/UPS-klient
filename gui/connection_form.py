@@ -136,7 +136,7 @@ class ConnectionForm:
     def quit_app(self):
         try:
             if self.client:
-                self.client.send("BYE")
+                self.client.send("BYE\n")
                 self.client.close()
         except Exception:
             pass

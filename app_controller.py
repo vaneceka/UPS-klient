@@ -76,7 +76,7 @@ class AppController:
             self.client = None
             return False
 
-        self.client.send(f"HELLO NICK {nickname}")
+        self.client.send(f"HELLO NICK {nickname}\n")
         return True
 
     # Routing mezi okny
