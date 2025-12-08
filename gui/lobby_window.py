@@ -49,7 +49,7 @@ class LobbyWindow:
     def _build_buttons(self):
         self.play_button = StyledButton(
             self.root,
-            text="Play",
+            text="Hrát",
             bg_color="#4CAF50",
             hover_color="#45A049",
             command=self.play

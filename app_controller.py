@@ -81,7 +81,7 @@ class AppController:
 
     # Routing mezi okny
     def _handle_message(self, message: str):
-        print("[Controller] Received:", message)
+        # print("[Controller] Received:", message)
 
         if message.startswith("WELCOME"):
             if hasattr(self.current_window, "on_welcome"):
@@ -118,10 +118,11 @@ class AppController:
         self.root.mainloop()
 
     def on_disconnect(self):
-        """Volá se z NetworkClientu, když spojení spadne."""
-        print("Odpojeno od serveru – zkouším reconnect...")
-
+        if isinstance(self.current_window, ConnectionForm):
+            self.reconnecting = False
+            return
         # pokud už reconnect běží, nic dalšího nepouštěj
+        print("Odpojeno od serveru – zkouším reconnect...")
         if self.reconnecting:
             return
 
@@ -131,7 +132,6 @@ class AppController:
         threading.Thread(target=self._reconnect_loop, daemon=True).start()
 
     def _reconnect_loop(self):
-        """Pokouší se reconnectnout na server během RECONNECT_TIMEOUT sekund."""
         # pokud nevíme, kam jsme byli připojeni, nemá cenu reconnectovat
         if not self.server_host or not self.server_port or not self.nickname:
             print("Nemám info o serveru/nicku, jdu zpět na ConnectionForm.")

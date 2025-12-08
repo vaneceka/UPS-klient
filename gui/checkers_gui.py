@@ -242,7 +242,7 @@ class CheckersGUI:
         self.draw_pieces() 
 
     def handle_server_message(self, message: str):
-        print("[GUI] Server:", message)
+        # print("[GUI] Server:", message)
 
         if message.startswith("BOARD"):
             self.update_from_server(message)
@@ -276,7 +276,7 @@ class CheckersGUI:
             self.canvas.delete("highlight")
 
             # Zobraz chybu jako text
-            self.error_label.config(text=f"Chyba: {err}")
+            self.error_label.config(text=f"{err}")
 
             # Auto-hide za 2 sekundy
             self.root.after(2000, lambda: self.error_label.config(text=""))

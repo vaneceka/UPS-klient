@@ -80,7 +80,8 @@ class NetworkClient:
                     break
                 
                 message = payload.decode("utf-8")
-                print("[RECV] ", message)
+                if message.strip() != "PING":
+                    print("[RECV] ", message)
 
                 if message.strip() == "PING":
                     self.send("PONG\n")
@@ -107,10 +108,13 @@ class NetworkClient:
     
     # Veřejné posílání zpráv (užívá nový protokol).
     def send(self, message: str):
-        print("[SEND] ", message)
+        if message.strip() != "PONG":
+            print("[SEND] ", message)
         self.send_packet(message)
 
     def close(self):
+        if self.sock is None:
+            return
         self.running = False
 
         if self.sock:
