@@ -7,7 +7,6 @@ from gui.connection_form import ConnectionForm
 from gui.lobby_window import LobbyWindow
 from gui.checkers_gui import CheckersGUI
 
-
 RECONNECT_TIMEOUT = 25
 RECONNECT_RETRY_DELAY = 1  
 
@@ -54,7 +53,6 @@ class AppController:
             opponent_name=opponent,
             network=self.client
         )
-
 
     def _clear_window(self):
         for widget in self.root.winfo_children():
@@ -172,22 +170,21 @@ class AppController:
                 )
                 new_client.on_disconnect = self.on_disconnect
 
-                # POKUS O JEDNO PŘIPOJENÍ
+                # POUZE JEDEN CONNECT
                 if new_client.connect():
                     print("Reconnect OK, přepínám klienta...")
 
-                    # ---- STARÉHO KLIENTA ZASTAVIT ----
+                    # stopneme starého klienta
                     old = self.client
-                    self.client = new_client     # Přepnout ihned
+                    self.client = new_client
 
                     if old:
-                        old.stopped_manually = True  # pokud používáš flag
                         old.stop()
 
-                    # ---- POSLAT HELLO ----
+                    # po přepnutí klienta pošleme opět HELLO
                     self.client.send(f"HELLO NICK {self.nickname}\n")
 
-                    # ---- UI NOTIFIKACE ----
+                    # obnovíme UI
                     self.root.after(0, lambda: (
                         hasattr(self.current_window, "on_reconnected")
                         and self.current_window.on_reconnected()

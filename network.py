@@ -16,7 +16,6 @@ class NetworkClient:
         self.root = root
         self.lock = threading.Lock() 
         self.last_ping_time = time.time()
-        self.stopped_manually = False
 
     def connect(self):
         if self.running:
@@ -38,7 +37,6 @@ class NetworkClient:
             print(f"Chyba při připojení: {e}")
             self.running = False
             return False
-
 
     def listen(self):
         self.sock.settimeout(1.0)  # každou 1s se probudí
@@ -83,12 +81,11 @@ class NetworkClient:
         except Exception as e:
             print("Chyba při čtení:", e)
 
-        was_running = self.running
         # konec spojení
         self.running = False
         self.close()
 
-        if was_running and not self.stopped_manually:
+        if hasattr(self, "on_disconnect") and self.on_disconnect:
             cb = self.on_disconnect
             if self.root:
                 self.root.after(0, lambda cb=cb: cb(self))
@@ -176,7 +173,6 @@ class NetworkClient:
 
     def stop(self):
         self.running = False
-        self.stopped_manually = True
         try:
             with self.lock:
                 if self.sock:
