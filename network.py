@@ -31,7 +31,7 @@ class NetworkClient:
             print(f"Připojeno k serveru {self.host}:{self.port}")
 
             threading.Thread(target=self.listen, daemon=True).start()
-            threading.Thread(target=self._ping_watchdog(PING_TIMEOUT), daemon=True).start()
+            threading.Thread(target=self._ping_watchdog,args=(PING_TIMEOUT,),daemon=True).start()
             return True
         except Exception as e:
             print(f"Chyba při připojení: {e}")
