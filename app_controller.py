@@ -21,6 +21,7 @@ class AppController:
         self.nickname = None
 
         self.reconnecting = False 
+        self.disconnected = False
         
         self.show_connection_form()
 
@@ -123,22 +124,27 @@ class AppController:
         self.root.mainloop()
 
     def on_disconnect(self):
+        # Když už víme, že je odpojeno → ignorujeme další volání
+        if self.disconnected:
+            return
+
+        self.disconnected = True  # označit, že jsme odpojeni
+
         if self.reconnecting:
             return
+
         if isinstance(self.current_window, ConnectionForm):
             self.reconnecting = False
             return
+
         if isinstance(self.current_window, CheckersGUI):
             self.root.after(0, self.current_window.show_server_unreachable)
         elif isinstance(self.current_window, LobbyWindow):
             self.root.after(0, self.current_window.show_server_unreachable)
-        # pokud už reconnect běží, nic dalšího nepouštěj
+
         print("Odpojeno od serveru – zkouším reconnect...")
-       
 
         self.reconnecting = True
-
-        # reconnect pustíme ve vedlejším vlákně, aby neblokoval Tkinter
         threading.Thread(target=self._reconnect_loop, daemon=True).start()
 
     def _reconnect_loop(self):
@@ -174,6 +180,7 @@ class AppController:
                     ))
 
                     self.reconnecting = False
+                    self.disconnected = False
                     return
 
             except Exception as e:
