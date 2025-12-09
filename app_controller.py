@@ -123,6 +123,8 @@ class AppController:
         self.root.mainloop()
 
     def on_disconnect(self):
+        if self.reconnecting:
+            return
         if isinstance(self.current_window, ConnectionForm):
             self.reconnecting = False
             return
@@ -132,8 +134,7 @@ class AppController:
             self.root.after(0, self.current_window.show_server_unreachable)
         # pokud už reconnect běží, nic dalšího nepouštěj
         print("Odpojeno od serveru – zkouším reconnect...")
-        if self.reconnecting:
-            return
+       
 
         self.reconnecting = True
 

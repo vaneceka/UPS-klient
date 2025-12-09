@@ -150,12 +150,6 @@ class NetworkClient:
                     pass
                 self.sock = None
 
-                # rovnou zavoláme on_disconnect (stejně jako na konci listen)
-                if hasattr(self, "on_disconnect") and self.on_disconnect:
-                    if self.root:
-                        self.root.after(0, self.on_disconnect)
-                    else:
-                        self.on_disconnect()
                 break
 
             time.sleep(1)
