@@ -1,3 +1,4 @@
+import socket
 import threading
 import time
 import tkinter as tk
@@ -123,8 +124,11 @@ class AppController:
     def run(self):
         self.root.mainloop()
 
-    def on_disconnect(self):
+    def on_disconnect(self,client):
         # Když už víme, že je odpojeno → ignorujeme další volání
+        if client is not self.client:
+            print("Odpojení starého klienta, ignoruju.")
+            return
         if self.disconnected:
             return
 

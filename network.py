@@ -124,10 +124,11 @@ class NetworkClient:
         self.close()
 
         if hasattr(self, "on_disconnect") and self.on_disconnect:
+            cb = self.on_disconnect
             if self.root:
-                self.root.after(0, self.on_disconnect)
+                self.root.after(0, lambda cb=cb: cb(self))
             else:
-                self.on_disconnect()
+                cb(self)
         
     # Veřejné posílání zpráv (užívá nový protokol).
     def send(self, message: str):
@@ -159,10 +160,11 @@ class NetworkClient:
 
             # Oznámit GUI, že jsme offline
             if hasattr(self, "on_disconnect") and self.on_disconnect:
+                cb = self.on_disconnect
                 if self.root:
-                    self.root.after(0, self.on_disconnect)
+                    self.root.after(0, lambda cb=cb: cb(self))
                 else:
-                    self.on_disconnect()
+                    cb(self)
 
     def close(self):
         if self.sock is None:
