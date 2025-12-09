@@ -20,7 +20,7 @@ class NetworkClient:
     def connect(self):
         if self.running:
             print("Už jsem připojen.")
-            return False
+            self.stop()
 
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -38,43 +38,6 @@ class NetworkClient:
             self.running = False
             return False
 
-    # Čte length-prefixed zprávy od serveru.
-    # def listen(self):
-    #     try:
-    #         # uděláme si "file-like" wrapper, který umí číst po řádcích
-    #         f = self.sock.makefile("r", encoding="utf-8", newline="\n")
-
-    #         for line in f:
-    #             # line obsahuje včetně '\n'
-    #             message = line.rstrip("\n").rstrip("\r")
-
-    #             if message.strip() != "PING":
-    #                 print("[RECV]", message)
-
-    #             # PING/PONG keepalive
-    #             if message.strip() == "PING":
-    #                 self.last_ping_time = time.time()
-    #                 self.send("PONG")  # \n doplníme v send()
-    #                 continue
-
-    #             if self.on_message_callback:
-    #                 if self.root:
-    #                     self.root.after(0, lambda m=message: self.on_message_callback(m))
-    #                 else:
-    #                     self.on_message_callback(message)
-
-    #     except Exception as e:
-    #         print("Chyba při čtení:", e)
-
-    #     # konec spojení
-    #     self.running = False
-    #     self.close()
-
-    #     if hasattr(self, "on_disconnect") and self.on_disconnect:
-    #         if self.root:
-    #             self.root.after(0, self.on_disconnect)
-    #         else:
-    #             self.on_disconnect()
 
     def listen(self):
         self.sock.settimeout(1.0)  # každou 1s se probudí

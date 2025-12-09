@@ -172,28 +172,29 @@ class AppController:
                 )
                 new_client.on_disconnect = self.on_disconnect
 
+                # POUZE JEDEN CONNECT
                 if new_client.connect():
-                    print("Reconnect OK, posílám HELLO NICK...")
+                    print("Reconnect OK, přepínám klienta...")
 
-                    # Znič starého klienta, aby jeho watchdog a listen již neběžel
-                    
-                    if new_client.connect():
-                        old = self.client   # ULOŽIT STARÉHO KLIENT
-                        self.client = new_client  # AŽ PAK přepsat
+                    # stopneme starého klienta
+                    old = self.client
+                    self.client = new_client
 
-                        if old:
-                            old.stop()  # UKONČIT SKUTEČNĚ STARÉHO KLIENTA
-                    
-                        self.client.send(f"HELLO NICK {self.nickname}\n")
+                    if old:
+                        old.stop()
 
-                        self.root.after(0, lambda: (
-                            hasattr(self.current_window, "on_reconnected") and 
-                            self.current_window.on_reconnected()
-                        ))
+                    # po přepnutí klienta pošleme opět HELLO
+                    self.client.send(f"HELLO NICK {self.nickname}\n")
 
-                        self.reconnecting = False
-                        self.disconnected = False
-                        return
+                    # obnovíme UI
+                    self.root.after(0, lambda: (
+                        hasattr(self.current_window, "on_reconnected")
+                        and self.current_window.on_reconnected()
+                    ))
+
+                    self.reconnecting = False
+                    self.disconnected = False
+                    return
 
             except Exception as e:
                 print("Chyba při reconnectu:", e)
