@@ -7,7 +7,7 @@ from gui.lobby_window import LobbyWindow
 from gui.checkers_gui import CheckersGUI
 
 
-RECONNECT_TIMEOUT = 20
+RECONNECT_TIMEOUT = 25
 RECONNECT_RETRY_DELAY = 1  
 
 class AppController:
