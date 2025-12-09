@@ -1,6 +1,7 @@
 import socket
 import threading
 import struct
+import time
 
 
 class NetworkClient:
@@ -13,32 +14,7 @@ class NetworkClient:
         self.on_disconnect = None
         self.root = root
         self.lock = threading.Lock() 
-
-
-    # Přečte přesně 'length' bajtů nebo vrátí None.
-    def recv_all(self, length):
-        data = b""
-        while len(data) < length:
-            try:
-                chunk = self.sock.recv(length - len(data))
-            except OSError:
-                return None
-            if not chunk:
-                return None
-            data += chunk
-        return data
-
-    # Pošle length-prefixed packet.
-    def send_packet(self, msg: str):
-        if not self.running:
-            return
-        try:
-            data = msg.encode("utf-8")
-            header = struct.pack("!I", len(data))
-            with self.lock:
-                self.sock.sendall(header + data)
-        except Exception as e:
-            print("Chyba při odesílání:", e)
+        self.last_ping_time = time.time()
 
     def connect(self):
         if self.running:
@@ -49,10 +25,12 @@ class NetworkClient:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.host, self.port))
             self.running = True
+            self.last_ping_time = time.time()
 
             print(f"Připojeno k serveru {self.host}:{self.port}")
 
             threading.Thread(target=self.listen, daemon=True).start()
+            threading.Thread(target=self._ping_watchdog, daemon=True).start()
             return True
         except Exception as e:
             print(f"Chyba při připojení: {e}")
@@ -74,6 +52,7 @@ class NetworkClient:
 
                 # PING/PONG keepalive
                 if message.strip() == "PING":
+                    self.last_ping_time = time.time()
                     self.send("PONG")  # \n doplníme v send()
                     continue
 
@@ -101,12 +80,10 @@ class NetworkClient:
         if not self.running or self.sock is None:
             return
 
-        # zajistíme newline
         if not message.endswith("\n"):
             message += "\n"
 
         if message.strip() != "PONG":
-            # nebudeme spamovat log PONGem
             print("[SEND]", message.strip())
 
         try:
@@ -114,6 +91,24 @@ class NetworkClient:
                 self.sock.sendall(message.encode("utf-8"))
         except Exception as e:
             print("Chyba při odesílání:", e)
+            # Bereme to jako odpojení
+            self.running = False
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
+            try:
+                self.sock.close()
+            except:
+                pass
+            self.sock = None
+
+            # Oznámit GUI, že jsme offline
+            if hasattr(self, "on_disconnect") and self.on_disconnect:
+                if self.root:
+                    self.root.after(0, self.on_disconnect)
+                else:
+                    self.on_disconnect()
 
     def close(self):
         if self.sock is None:
@@ -134,3 +129,32 @@ class NetworkClient:
 
         self.sock = None
         print("Odpojeno od serveru.")
+
+    def _ping_watchdog(self, timeout=10):
+        while self.running:
+            if time.time() - self.last_ping_time > timeout:
+                print("Watchdog: dlouho nepřišel PING, beru to jako odpojení.")
+                # násilně ukončíme spojení
+                self.running = False
+                try:
+                    with self.lock:
+                        if self.sock:
+                            self.sock.shutdown(socket.SHUT_RDWR)
+                except:
+                    pass
+                try:
+                    if self.sock:
+                        self.sock.close()
+                except:
+                    pass
+                self.sock = None
+
+                # rovnou zavoláme on_disconnect (stejně jako na konci listen)
+                if hasattr(self, "on_disconnect") and self.on_disconnect:
+                    if self.root:
+                        self.root.after(0, self.on_disconnect)
+                    else:
+                        self.on_disconnect()
+                break
+
+            time.sleep(1)
