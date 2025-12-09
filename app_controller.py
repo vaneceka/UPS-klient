@@ -177,9 +177,13 @@ class AppController:
 
                     # Znič starého klienta, aby jeho watchdog a listen již neběžel
                     
-                    if self.client:
-                        self.client.stop()
-                    self.client = new_client
+                    if new_client.connect():
+                        old = self.client   # ULOŽIT STARÉHO KLIENTA
+
+                        self.client = new_client  # AŽ PAK přepsat
+
+                        if old:
+                            old.stop()  # UKONČIT SKUTEČNĚ STARÉHO KLIENTA
                     
                     self.client.send(f"HELLO NICK {self.nickname}\n")
 
