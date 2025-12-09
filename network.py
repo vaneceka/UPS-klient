@@ -208,3 +208,20 @@ class NetworkClient:
                 break
 
             time.sleep(1)
+
+    def stop(self):
+        self.running = False
+        try:
+            with self.lock:
+                if self.sock:
+                    try:
+                        self.sock.shutdown(socket.SHUT_RDWR)
+                    except:
+                        pass
+                    try:
+                        self.sock.close()
+                    except:
+                        pass
+        except:
+            pass
+        self.sock = None

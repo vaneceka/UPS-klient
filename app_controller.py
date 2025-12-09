@@ -176,20 +176,9 @@ class AppController:
                     print("Reconnect OK, posílám HELLO NICK...")
 
                     # Znič starého klienta, aby jeho watchdog a listen již neběžel
+                    
                     if self.client:
-                        try:
-                            self.client.running = False
-                            if self.client.sock:
-                                try:
-                                    self.client.sock.shutdown(socket.SHUT_RDWR)
-                                except:
-                                    pass
-                                try:
-                                    self.client.sock.close()
-                                except:
-                                    pass
-                        except:
-                            pass
+                        self.client.stop()
                     self.client = new_client
                     
                     self.client.send(f"HELLO NICK {self.nickname}\n")
