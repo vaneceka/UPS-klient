@@ -84,8 +84,13 @@ class AppController:
         # print("[Controller] Received:", message)
 
         if message.startswith("WELCOME"):
-            if hasattr(self.current_window, "on_welcome"):
+            if isinstance(self.current_window, ConnectionForm):
                 return self.current_window.on_welcome()
+            if isinstance(self.current_window, LobbyWindow) and self.reconnecting:
+                self.reconnecting = False
+                if hasattr(self.current_window, "on_reconnected"):
+                    self.current_window.on_reconnected()
+                return
 
         if message.startswith("ERROR NICK_IN_USE"):
             if hasattr(self.current_window, "on_nick_in_use"):

@@ -107,3 +107,17 @@ class LobbyWindow:
             self.disconnect_button.disable()
         except Exception:
             pass
+    
+    def on_reconnected(self):
+        self.status_label.config(
+            text="Znovu připojeno k serveru. Můžeš pokračovat.",
+            fg="#555"
+        )
+        try:
+            self.play_button.enable()
+        except Exception:
+            pass
+        try:
+            self.disconnect_button.enable()
+        except Exception:
+            pass
