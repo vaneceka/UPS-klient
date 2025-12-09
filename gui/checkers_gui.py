@@ -440,3 +440,4 @@ class CheckersGUI:
             text="Spojení se serverem bylo ztraceno.",
             fg="orange"
         )
+        self.turn_label.update_idletasks()
