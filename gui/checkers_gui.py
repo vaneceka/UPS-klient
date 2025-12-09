@@ -432,3 +432,11 @@ class CheckersGUI:
             on_restart=self.restart_to_lobby,
             on_quit=self.quit_game
         )
+
+    def show_server_unreachable(self):
+        """Volá se, když se ztratí spojení se serverem."""
+        self.my_turn = False
+        self.turn_label.config(
+            text="Spojení se serverem bylo ztraceno.",
+            fg="orange"
+        )

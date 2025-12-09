@@ -7,7 +7,7 @@ from gui.lobby_window import LobbyWindow
 from gui.checkers_gui import CheckersGUI
 
 
-RECONNECT_TIMEOUT = 15    
+RECONNECT_TIMEOUT = 20
 RECONNECT_RETRY_DELAY = 1  
 
 class AppController:
@@ -121,6 +121,11 @@ class AppController:
         if isinstance(self.current_window, ConnectionForm):
             self.reconnecting = False
             return
+        if isinstance(self.current_window, CheckersGUI):
+            self.root.after(0, self.current_window.show_server_unreachable)
+        elif isinstance(self.current_window, LobbyWindow):
+            if hasattr(self.current_window, "show_server_unreachable"):
+                self.root.after(0, self.current_window.show_server_unreachable)
         # pokud už reconnect běží, nic dalšího nepouštěj
         print("Odpojeno od serveru – zkouším reconnect...")
         if self.reconnecting:
@@ -132,7 +137,6 @@ class AppController:
         threading.Thread(target=self._reconnect_loop, daemon=True).start()
 
     def _reconnect_loop(self):
-        # pokud nevíme, kam jsme byli připojeni, nemá cenu reconnectovat
         if not self.server_host or not self.server_port or not self.nickname:
             print("Nemám info o serveru/nicku, jdu zpět na ConnectionForm.")
             self.reconnecting = False
@@ -158,7 +162,6 @@ class AppController:
                     # přepneme se na nového klienta
                     self.client = new_client
                     self.client.send(f"HELLO NICK {self.nickname}\n")
-                    # dál už se vše řeší v _handle_message (GAME_START / GAME_OVER)
                     self.reconnecting = False
                     return
 

@@ -61,30 +61,20 @@ class NetworkClient:
 
     # Čte length-prefixed zprávy od serveru.
     def listen(self):
-        while self.running:
-            try:
-                header = self.recv_all(4)
-                if not header:
-                    print("Spojení ukončeno (header).")
-                    break
-                
-                (length,) = struct.unpack("!I", header)
+        try:
+            # uděláme si "file-like" wrapper, který umí číst po řádcích
+            f = self.sock.makefile("r", encoding="utf-8", newline="\n")
 
-                if length == 0 or length > 65536:
-                    print("Neplatná délka:", length)
-                    break
-                    
-                payload = self.recv_all(length)
-                if not payload:
-                    print("Spojení ukončeno (payload).")
-                    break
-                
-                message = payload.decode("utf-8")
+            for line in f:
+                # line obsahuje včetně '\n'
+                message = line.rstrip("\n").rstrip("\r")
+
                 if message.strip() != "PING":
-                    print("[RECV] ", message)
+                    print("[RECV]", message)
 
+                # PING/PONG keepalive
                 if message.strip() == "PING":
-                    self.send("PONG\n")
+                    self.send("PONG")  # \n doplníme v send()
                     continue
 
                 if self.on_message_callback:
@@ -93,14 +83,14 @@ class NetworkClient:
                     else:
                         self.on_message_callback(message)
 
-            except Exception as e:
-                print("Chyba při čtení:", e)
-                break
+        except Exception as e:
+            print("Chyba při čtení:", e)
 
+        # konec spojení
         self.running = False
         self.close()
 
-        if hasattr(self, 'on_disconnect') and self.on_disconnect:
+        if hasattr(self, "on_disconnect") and self.on_disconnect:
             if self.root:
                 self.root.after(0, self.on_disconnect)
             else:
@@ -108,9 +98,22 @@ class NetworkClient:
     
     # Veřejné posílání zpráv (užívá nový protokol).
     def send(self, message: str):
+        if not self.running or self.sock is None:
+            return
+
+        # zajistíme newline
+        if not message.endswith("\n"):
+            message += "\n"
+
         if message.strip() != "PONG":
-            print("[SEND] ", message)
-        self.send_packet(message)
+            # nebudeme spamovat log PONGem
+            print("[SEND]", message.strip())
+
+        try:
+            with self.lock:
+                self.sock.sendall(message.encode("utf-8"))
+        except Exception as e:
+            print("Chyba při odesílání:", e)
 
     def close(self):
         if self.sock is None:
