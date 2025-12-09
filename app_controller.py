@@ -124,8 +124,7 @@ class AppController:
         if isinstance(self.current_window, CheckersGUI):
             self.root.after(0, self.current_window.show_server_unreachable)
         elif isinstance(self.current_window, LobbyWindow):
-            if hasattr(self.current_window, "show_server_unreachable"):
-                self.root.after(0, self.current_window.show_server_unreachable)
+            self.root.after(0, self.current_window.show_server_unreachable)
         # pokud už reconnect běží, nic dalšího nepouštěj
         print("Odpojeno od serveru – zkouším reconnect...")
         if self.reconnecting:
@@ -173,3 +172,4 @@ class AppController:
         print("Reconnect se nepodařil včas, vracím do ConnectionForm.")
         self.reconnecting = False
         self.root.after(0, self.show_connection_form)
+

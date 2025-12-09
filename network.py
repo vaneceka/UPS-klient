@@ -3,6 +3,7 @@ import threading
 import struct
 import time
 
+PING_TIMEOUT = 16
 
 class NetworkClient:
     def __init__(self, host, port, on_message_callback=None, root=None):
@@ -30,7 +31,7 @@ class NetworkClient:
             print(f"Připojeno k serveru {self.host}:{self.port}")
 
             threading.Thread(target=self.listen, daemon=True).start()
-            threading.Thread(target=self._ping_watchdog, daemon=True).start()
+            threading.Thread(target=self._ping_watchdog(PING_TIMEOUT), daemon=True).start()
             return True
         except Exception as e:
             print(f"Chyba při připojení: {e}")
@@ -130,7 +131,7 @@ class NetworkClient:
         self.sock = None
         print("Odpojeno od serveru.")
 
-    def _ping_watchdog(self, timeout=10):
+    def _ping_watchdog(self, timeout=15):
         while self.running:
             if time.time() - self.last_ping_time > timeout:
                 print("Watchdog: dlouho nepřišel PING, beru to jako odpojení.")

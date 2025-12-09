@@ -90,3 +90,20 @@ class LobbyWindow:
             pass
         self.root.destroy()
         sys.exit(0)
+
+    def show_server_unreachable(self):
+        """Zobrazí v lobby, že je server nedostupný."""
+        self.status_label.config(
+            text="Spojení se serverem bylo ztraceno.\nZkouším se znovu připojit...",
+            fg="red"
+        )
+        # volitelně: zakázat tlačítka
+        try:
+            self.play_button.disable()
+        except Exception:
+            pass
+
+        try:
+            self.disconnect_button.disable()
+        except Exception:
+            pass
