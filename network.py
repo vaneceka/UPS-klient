@@ -153,13 +153,26 @@ class NetworkClient:
     def _ping_watchdog(self, timeout=15):
         while self.running:
             if time.time() - self.last_ping_time > timeout:
-                print("Watchdog timeout")
+                print("Watchdog: dlouho nepřišel PING, beru to jako odpojení.")
+                # násilně ukončíme spojení
+                self.running = False
+                try:
+                    with self.lock:
+                        if self.sock:
+                            self.sock.shutdown(socket.SHUT_RDWR)
+                except:
+                    pass
+                try:
+                    if self.sock:
+                        self.sock.close()
+                except:
+                    pass
+                self.sock = None
 
-                self.stop()
-                return
+                break
 
             time.sleep(1)
-            
+
     def stop(self):
         self.running = False
         try:

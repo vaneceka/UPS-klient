@@ -129,6 +129,10 @@ class AppController:
         if client is not self.client:
             print("Odpojení starého klienta, ignoruju.")
             return
+        if not client.running:
+            print("Odpojení klienta, který už byl zastaven -> ignoruju.")
+            return
+
         if self.disconnected:
             return
 
@@ -178,10 +182,17 @@ class AppController:
 
                     # stopneme starého klienta
                     old = self.client
-                    self.client = new_client
 
+                    # 1️⃣ Okamžitě odpoj starého klienta, aby se zastavily jeho vlákna
                     if old:
-                        old.stop()
+                        old.running = False
+                        try:
+                            old.close()
+                        except:
+                            pass
+
+                    # 2️⃣ Až teď přepni klienta
+                    self.client = new_client
 
                     # po přepnutí klienta pošleme opět HELLO
                     self.client.send(f"HELLO NICK {self.nickname}\n")
