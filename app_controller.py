@@ -178,23 +178,22 @@ class AppController:
                     # Znič starého klienta, aby jeho watchdog a listen již neběžel
                     
                     if new_client.connect():
-                        old = self.client   # ULOŽIT STARÉHO KLIENTA
-
+                        old = self.client   # ULOŽIT STARÉHO KLIENT
                         self.client = new_client  # AŽ PAK přepsat
 
                         if old:
                             old.stop()  # UKONČIT SKUTEČNĚ STARÉHO KLIENTA
                     
-                    self.client.send(f"HELLO NICK {self.nickname}\n")
+                        self.client.send(f"HELLO NICK {self.nickname}\n")
 
-                    self.root.after(0, lambda: (
-                        hasattr(self.current_window, "on_reconnected") and 
-                        self.current_window.on_reconnected()
-                    ))
+                        self.root.after(0, lambda: (
+                            hasattr(self.current_window, "on_reconnected") and 
+                            self.current_window.on_reconnected()
+                        ))
 
-                    self.reconnecting = False
-                    self.disconnected = False
-                    return
+                        self.reconnecting = False
+                        self.disconnected = False
+                        return
 
             except Exception as e:
                 print("Chyba při reconnectu:", e)
