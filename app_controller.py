@@ -128,6 +128,13 @@ class AppController:
             print("Odpojení starého klienta, ignoruju.")
             return
 
+        # pokud UI právě obdrželo OPPONENT_RECONNECTED,
+        # nejedná se o skutečné odpojení
+        if hasattr(self.current_window, "waiting_for_opponent") and \
+            self.current_window.waiting_for_opponent:
+            print("Soupeřův reconnect – nejedná se o naše odpojení.")
+            return
+  
         if self.client and self.client.running:
             print("Socket stále běží – falešné odpojení, ignoruju.")
             return
