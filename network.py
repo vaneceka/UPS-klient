@@ -16,6 +16,7 @@ class NetworkClient:
         self.root = root
         self.lock = threading.Lock() 
         self.last_ping_time = time.time()
+        self.stopped_manually = False
 
     def connect(self):
         if self.running:

@@ -23,7 +23,6 @@ class AppController:
 
         self.reconnecting = False 
         self.disconnected = False
-        self.stopped_manually = False
         
         self.show_connection_form()
 
