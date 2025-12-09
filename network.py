@@ -82,11 +82,12 @@ class NetworkClient:
         except Exception as e:
             print("Chyba při čtení:", e)
 
+        was_running = self.running
         # konec spojení
         self.running = False
         self.close()
 
-        if hasattr(self, "on_disconnect") and self.on_disconnect:
+        if was_running and self.on_disconnect:
             cb = self.on_disconnect
             if self.root:
                 self.root.after(0, lambda cb=cb: cb(self))
@@ -152,26 +153,13 @@ class NetworkClient:
     def _ping_watchdog(self, timeout=15):
         while self.running:
             if time.time() - self.last_ping_time > timeout:
-                print("Watchdog: dlouho nepřišel PING, beru to jako odpojení.")
-                # násilně ukončíme spojení
-                self.running = False
-                try:
-                    with self.lock:
-                        if self.sock:
-                            self.sock.shutdown(socket.SHUT_RDWR)
-                except:
-                    pass
-                try:
-                    if self.sock:
-                        self.sock.close()
-                except:
-                    pass
-                self.sock = None
+                print("Watchdog timeout")
 
-                break
+                self.stop()
+                return
 
             time.sleep(1)
-
+            
     def stop(self):
         self.running = False
         try:
