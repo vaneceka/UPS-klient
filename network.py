@@ -87,7 +87,7 @@ class NetworkClient:
         self.running = False
         self.close()
 
-        if was_running and self.on_disconnect:
+        if was_running and not self.stopped_manually:
             cb = self.on_disconnect
             if self.root:
                 self.root.after(0, lambda cb=cb: cb(self))
@@ -175,6 +175,7 @@ class NetworkClient:
 
     def stop(self):
         self.running = False
+        self.stopped_manually = True
         try:
             with self.lock:
                 if self.sock:

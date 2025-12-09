@@ -23,6 +23,7 @@ class AppController:
 
         self.reconnecting = False 
         self.disconnected = False
+        self.stopped_manually = False
         
         self.show_connection_form()
 
@@ -129,10 +130,6 @@ class AppController:
         if client is not self.client:
             print("Odpojení starého klienta, ignoruju.")
             return
-        if not client.running:
-            print("Odpojení klienta, který už byl zastaven -> ignoruju.")
-            return
-
         if self.disconnected:
             return
 
@@ -176,28 +173,22 @@ class AppController:
                 )
                 new_client.on_disconnect = self.on_disconnect
 
-                # POUZE JEDEN CONNECT
+                # POKUS O JEDNO PŘIPOJENÍ
                 if new_client.connect():
                     print("Reconnect OK, přepínám klienta...")
 
-                    # stopneme starého klienta
+                    # ---- STARÉHO KLIENTA ZASTAVIT ----
                     old = self.client
+                    self.client = new_client     # Přepnout ihned
 
-                    # 1️⃣ Okamžitě odpoj starého klienta, aby se zastavily jeho vlákna
                     if old:
-                        old.running = False
-                        try:
-                            old.close()
-                        except:
-                            pass
+                        old.stopped_manually = True  # pokud používáš flag
+                        old.stop()
 
-                    # 2️⃣ Až teď přepni klienta
-                    self.client = new_client
-
-                    # po přepnutí klienta pošleme opět HELLO
+                    # ---- POSLAT HELLO ----
                     self.client.send(f"HELLO NICK {self.nickname}\n")
 
-                    # obnovíme UI
+                    # ---- UI NOTIFIKACE ----
                     self.root.after(0, lambda: (
                         hasattr(self.current_window, "on_reconnected")
                         and self.current_window.on_reconnected()
@@ -215,4 +206,3 @@ class AppController:
         print("Reconnect se nepodařil včas, vracím do ConnectionForm.")
         self.reconnecting = False
         self.root.after(0, self.show_connection_form)
-
