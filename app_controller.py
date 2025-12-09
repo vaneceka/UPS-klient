@@ -164,9 +164,16 @@ class AppController:
 
                 if new_client.connect():
                     print("Reconnect OK, posílám HELLO NICK...")
-                    # přepneme se na nového klienta
+
                     self.client = new_client
                     self.client.send(f"HELLO NICK {self.nickname}\n")
+
+                    # ✔ GUI okamžitě ví, že je reconnect
+                    self.root.after(0, lambda: (
+                        hasattr(self.current_window, "on_reconnected") and 
+                        self.current_window.on_reconnected()
+                    ))
+
                     self.reconnecting = False
                     return
 
