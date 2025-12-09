@@ -39,29 +39,82 @@ class NetworkClient:
             return False
 
     # Čte length-prefixed zprávy od serveru.
+    # def listen(self):
+    #     try:
+    #         # uděláme si "file-like" wrapper, který umí číst po řádcích
+    #         f = self.sock.makefile("r", encoding="utf-8", newline="\n")
+
+    #         for line in f:
+    #             # line obsahuje včetně '\n'
+    #             message = line.rstrip("\n").rstrip("\r")
+
+    #             if message.strip() != "PING":
+    #                 print("[RECV]", message)
+
+    #             # PING/PONG keepalive
+    #             if message.strip() == "PING":
+    #                 self.last_ping_time = time.time()
+    #                 self.send("PONG")  # \n doplníme v send()
+    #                 continue
+
+    #             if self.on_message_callback:
+    #                 if self.root:
+    #                     self.root.after(0, lambda m=message: self.on_message_callback(m))
+    #                 else:
+    #                     self.on_message_callback(message)
+
+    #     except Exception as e:
+    #         print("Chyba při čtení:", e)
+
+    #     # konec spojení
+    #     self.running = False
+    #     self.close()
+
+    #     if hasattr(self, "on_disconnect") and self.on_disconnect:
+    #         if self.root:
+    #             self.root.after(0, self.on_disconnect)
+    #         else:
+    #             self.on_disconnect()
+
     def listen(self):
+        self.sock.settimeout(1.0)  # každou 1s se probudí
+
+        buffer = ""
+
         try:
-            # uděláme si "file-like" wrapper, který umí číst po řádcích
-            f = self.sock.makefile("r", encoding="utf-8", newline="\n")
-
-            for line in f:
-                # line obsahuje včetně '\n'
-                message = line.rstrip("\n").rstrip("\r")
-
-                if message.strip() != "PING":
-                    print("[RECV]", message)
-
-                # PING/PONG keepalive
-                if message.strip() == "PING":
-                    self.last_ping_time = time.time()
-                    self.send("PONG")  # \n doplníme v send()
+            while self.running:
+                try:
+                    data = self.sock.recv(4096)
+                except socket.timeout:
+                    # timeout není chyba, jen nic nepřišlo
                     continue
 
-                if self.on_message_callback:
-                    if self.root:
-                        self.root.after(0, lambda m=message: self.on_message_callback(m))
-                    else:
-                        self.on_message_callback(message)
+                # server ukončil spojení korektně
+                if not data:
+                    break  
+
+                buffer += data.decode("utf-8")
+
+                # zpracovat všechny kompletní řádky
+                while "\n" in buffer:
+                    line, buffer = buffer.split("\n", 1)
+                    message = line.strip()
+
+                    if message != "PING":
+                        print("[RECV]", message)
+
+                    # Keepalive
+                    if message == "PING":
+                        self.last_ping_time = time.time()
+                        self.send("PONG")
+                        continue
+
+                    # Odeslat zprávu do GUI
+                    if self.on_message_callback:
+                        if self.root:
+                            self.root.after(0, lambda m=message: self.on_message_callback(m))
+                        else:
+                            self.on_message_callback(message)
 
         except Exception as e:
             print("Chyba při čtení:", e)
@@ -75,7 +128,7 @@ class NetworkClient:
                 self.root.after(0, self.on_disconnect)
             else:
                 self.on_disconnect()
-    
+        
     # Veřejné posílání zpráv (užívá nový protokol).
     def send(self, message: str):
         if not self.running or self.sock is None:

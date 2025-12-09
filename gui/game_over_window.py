@@ -25,7 +25,7 @@ class GameOverWindow:
         # Hrát znovu
         StyledButton(
             self.win,
-            text="🔁 Hrát znovu",
+            text="Hrát znovu",
             bg_color="#4CAF50",
             hover_color="#45A049",
             command=lambda: on_restart(self.win)
@@ -34,7 +34,7 @@ class GameOverWindow:
         # Ukončit hru
         StyledButton(
             self.win,
-            text="🚪 Ukončit hru",
+            text="Ukončit hru",
             bg_color="#E53935",
             hover_color="#C62828",
             command=lambda: on_quit(self.win)
