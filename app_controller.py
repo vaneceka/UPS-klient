@@ -127,6 +127,10 @@ class AppController:
         if client is not self.client:
             print("Odpojení starého klienta, ignoruju.")
             return
+
+        if self.client and self.client.running:
+            print("Socket stále běží – falešné odpojení, ignoruju.")
+            return
         if self.disconnected:
             return
 

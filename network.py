@@ -53,7 +53,10 @@ class NetworkClient:
 
                 # server ukončil spojení korektně
                 if not data:
-                    break  
+                    if not self.running:
+                        # plánované zavření nebo watchdog stop
+                        return
+                    break  # skutečné odpojení 
 
                 buffer += data.decode("utf-8")
 

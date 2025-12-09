@@ -261,9 +261,12 @@ class CheckersGUI:
 
         elif message.startswith("OPPONENT_DISCONNECTED"):
             self.turn_label.config(text="Soupeř se odpojil, čekám...", fg="orange")
+            self.waiting_for_opponent = True
+            
 
         elif message.startswith("OPPONENT_RECONNECTED"):
             self.turn_label.config(text="Soupeř se připojil zpět", fg="green")
+            self.waiting_for_opponent = True
 
         elif message.startswith("GAME_OVER"):
             self.handle_game_over(message)
