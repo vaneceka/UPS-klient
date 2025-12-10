@@ -134,24 +134,11 @@ class AppController:
     def run(self):
         self.root.mainloop()
 
-    def on_disconnect(self,client):
-        # Když už víme, že je odpojeno → ignorujeme další volání
-        if client is not self.client:
-            print("Odpojení starého klienta, ignoruju.")
-            return
-
-        if self.disconnected:
-            print("zastavi se to opravdu tady????")
-            return
-
-        self.disconnected = True  # označit, že jsme odpojeni
-
+    def on_disconnect(self, client):
         if self.reconnecting:
             return
 
-        if isinstance(self.current_window, ConnectionForm):
-            self.reconnecting = False
-            return
+        self.disconnected = True
 
         if isinstance(self.current_window, CheckersGUI):
             self.root.after(0, self.current_window.show_server_unreachable)
@@ -159,7 +146,6 @@ class AppController:
             self.root.after(0, self.current_window.show_server_unreachable)
 
         print("Odpojeno od serveru – zkouším reconnect...")
-
         self.reconnecting = True
         threading.Thread(target=self._reconnect_loop, daemon=True).start()
 
