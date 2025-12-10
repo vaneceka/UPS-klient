@@ -171,9 +171,11 @@ class NetworkClient:
         print("Odpojeno od serveru.")
 
     def _ping_watchdog(self, my_id, timeout=15):
+        print(f"[WATCHDOG START] my_id={my_id}, sock_id={self.sock_id}, client_obj={id(self)} thread={threading.get_ident()}")
         while self.running and my_id == self.sock_id:
             if time.time() - self.last_ping_time > timeout:
                 print("Watchdog: dlouho nepřišel PING, beru to jako odpojení.")
+                print(f"[WATCHDOG TIMEOUT] my_id={my_id}, sock_id={self.sock_id}, client_obj={id(self)} thread={threading.get_ident()}")
                 # násilně ukončíme spojení
                 self.running = False
                 try:
@@ -192,6 +194,7 @@ class NetworkClient:
                 break
 
             time.sleep(1)
+        print(f"[WATCHDOG END] my_id={my_id}, sock_id={self.sock_id}, client_obj={id(self)} thread={threading.get_ident()}")
 
     def stop(self):
         self.sock_id += 1

@@ -191,6 +191,8 @@ class AppController:
                     # stopneme starého klienta
                     old = self.client
                     self.client = new_client
+                    
+                    new_client.last_ping_time = time.time()
 
                     if old:
                         old.stop()
