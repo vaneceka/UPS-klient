@@ -16,11 +16,22 @@ class NetworkClient:
         self.root = root
         self.lock = threading.Lock() 
         self.last_ping_time = time.time()
+        self.sock_id = 0
 
     def connect(self):
         if self.running:
-            print("Už jsem připojen.")
-            self.stop()
+            print("Stopuji starý klient...")
+            self.running = False
+            self.sock_id += 1   # ← stará vlákna okamžitě vypadnou
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
+            except:
+                pass
+            try:
+                self.sock.close()
+            except:
+                pass
+            self.sock = None
 
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,22 +40,28 @@ class NetworkClient:
             self.last_ping_time = time.time()
 
             print(f"Připojeno k serveru {self.host}:{self.port}")
+            self.sock_id += 1
+            my_id = self.sock_id
+            print(f"moje id je :{my_id}")
 
-            threading.Thread(target=self.listen, daemon=True).start()
-            threading.Thread(target=self._ping_watchdog, args=(PING_TIMEOUT,), daemon=True).start()
+            threading.Thread(target=self.listen,args=(my_id,), daemon=True).start()
+            threading.Thread(target=self._ping_watchdog, args=(my_id,PING_TIMEOUT,), daemon=True).start()
             return True
+        
         except Exception as e:
             print(f"Chyba při připojení: {e}")
             self.running = False
             return False
 
-    def listen(self):
-        self.sock.settimeout(1.0)  # každou 1s se probudí
-
-        buffer = ""
-
+    def listen(self, my_id):
+        if my_id != self.sock_id:
+            return
         try:
-            while self.running:
+            self.sock.settimeout(1.0)  # každou 1s se probudí
+            buffer = ""
+            while self.running and my_id == self.sock_id:
+                if not self.sock:
+                    break
                 try:
                     data = self.sock.recv(4096)
                 except socket.timeout:
@@ -80,17 +97,22 @@ class NetworkClient:
 
         except Exception as e:
             print("Chyba při čtení:", e)
+            self.running = False
 
-        # konec spojení
+        active = (my_id == self.sock_id)
+
         self.running = False
         self.close()
 
-        if hasattr(self, "on_disconnect") and self.on_disconnect:
-            cb = self.on_disconnect
+        if self.on_disconnect and active:
+            # jen aktivní klient má právo vyvolat disconnect událost
+            print("wohoooooooo")
             if self.root:
-                self.root.after(0, lambda cb=cb: cb(self))
+                print("aooooo")
+                self.root.after(0, lambda cb=self.on_disconnect: cb(self))
             else:
-                cb(self)
+                print("bbbbbbbb")
+                self.on_disconnect(self)
         
     # Veřejné posílání zpráv (užívá nový protokol).
     def send(self, message: str):
@@ -148,8 +170,8 @@ class NetworkClient:
         self.sock = None
         print("Odpojeno od serveru.")
 
-    def _ping_watchdog(self, timeout=15):
-        while self.running:
+    def _ping_watchdog(self, my_id, timeout=15):
+        while self.running and my_id == self.sock_id:
             if time.time() - self.last_ping_time > timeout:
                 print("Watchdog: dlouho nepřišel PING, beru to jako odpojení.")
                 # násilně ukončíme spojení
@@ -161,7 +183,7 @@ class NetworkClient:
                 except:
                     pass
                 try:
-                    if self.sock:
+                    if self.sock and my_id == self.sock_id:
                         self.sock.close()
                 except:
                     pass
@@ -172,7 +194,9 @@ class NetworkClient:
             time.sleep(1)
 
     def stop(self):
+        self.sock_id += 1
         self.running = False
+        self.on_disconnect = None
         try:
             with self.lock:
                 if self.sock:

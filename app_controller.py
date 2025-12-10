@@ -27,6 +27,14 @@ class AppController:
 
     # Window management
     def show_connection_form(self):
+        if self.client:
+            print("dostanu se sem???????")
+            self.client.on_disconnect = None
+            self.client.stop()
+        self.client = None
+        
+        self.reconnecting = False
+        self.disconnected = False
         self.root.deiconify()
         self._clear_window()
         self.current_window = ConnectionForm(self.root, controller=self)
@@ -63,6 +71,10 @@ class AppController:
         self.nickname = nickname
         self.server_host = host       
         self.server_port = port 
+
+        self.reconnecting = False
+        self.disconnected = False
+        
         self.client = NetworkClient(
             host,
             port,
@@ -129,6 +141,7 @@ class AppController:
             return
 
         if self.disconnected:
+            print("zastavi se to opravdu tady????")
             return
 
         self.disconnected = True  # označit, že jsme odpojeni
