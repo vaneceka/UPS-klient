@@ -300,7 +300,7 @@ class CheckersGUI:
     def on_window_close(self):
         try:
             if self.network:
-                self.network.send("BYE\n")
+                # self.network.send("BYE\n")
                 self.network.close()
         except:
             pass
