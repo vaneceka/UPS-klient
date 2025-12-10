@@ -15,7 +15,6 @@ class ConnectionForm:
         self._init_window()
         self._build_ui()
 
-    # UI
     def _init_window(self):
         self.root.title("Připojení k serveru")
         self.root.configure(bg="#F5F5F5")

@@ -25,7 +25,6 @@ class AppController:
         
         self.show_connection_form()
 
-    # Window management
     def show_connection_form(self):
         if self.client:
             print("dostanu se sem???????")
@@ -66,7 +65,6 @@ class AppController:
         for widget in self.root.winfo_children():
             widget.destroy()
 
-    # Network
     def connect(self, host, port, nickname) -> bool:
         self.nickname = nickname
         self.server_host = host       
@@ -93,8 +91,6 @@ class AppController:
 
     # Routing mezi okny
     def _handle_message(self, message: str):
-        # print("[Controller] Received:", message)
-
         if message.startswith("WELCOME"):
             if isinstance(self.current_window, ConnectionForm):
                 return self.current_window.on_welcome()
@@ -123,7 +119,6 @@ class AppController:
             self.show_game(color, self.nickname, opponent)
             return
 
-        # Hra skončila – možno hrát znovu
         if message.startswith("GAME_OVER YOU_CAN_PLAY_AGAIN"):
             return self.show_lobby(self.nickname)
 
@@ -170,7 +165,6 @@ class AppController:
                 )
                 new_client.on_disconnect = self.on_disconnect
 
-                # POUZE JEDEN CONNECT
                 if new_client.connect():
                     print("Reconnect OK, přepínám klienta...")
 

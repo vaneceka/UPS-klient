@@ -52,7 +52,7 @@ class CheckersGUI:
         top_frame.columnconfigure(1, weight=1)
         top_frame.columnconfigure(2, weight=1)
 
-        # LEFT
+        # left
         left = tk.Frame(top_frame, bg=BG_COLOR)
         left.grid(row=0, column=0, sticky="w")
 
@@ -65,7 +65,7 @@ class CheckersGUI:
         )
         self.info_label.pack(side="left", padx=8)
 
-        # CENTER (error)
+        # error
         self.error_label = tk.Label(
             top_frame,
             text="",
@@ -75,7 +75,7 @@ class CheckersGUI:
         )
         self.error_label.place(relx=0.5, rely=0.5, anchor="center")
 
-        # RIGHT
+        # right
         right = tk.Frame(top_frame,bg=BG_COLOR)
         right.grid(row=0, column=2, sticky="e")
 
@@ -98,13 +98,11 @@ class CheckersGUI:
         self.canvas.bind("<Configure>", self.redraw_board)
         self.canvas.bind("<Button-1>", self.on_click)
 
-    # Při změně velikosti okna, se hra překreslí
     def redraw_board(self, event=None):
         self.canvas.delete("all")
 
         w = self.canvas.winfo_width()
         h = self.canvas.winfo_height()
-        # ještě není pořádně změřeno
         if w <= 1 or h <= 1:
             return  
 
@@ -126,7 +124,6 @@ class CheckersGUI:
 
         self.draw_pieces()
 
-    # Vykreslení figurek
     def draw_pieces(self):
         # pokud je spočítaná velikost pole pokračuj
         if not self.cell:
@@ -216,7 +213,6 @@ class CheckersGUI:
     def update_from_server(self, board_message: str):
         parts = board_message.strip().split()
 
-        # BOARD + 64 hodnot
         if len(parts) < 65:
             print("Nekompletní BOARD:", board_message)
             return
@@ -226,7 +222,7 @@ class CheckersGUI:
         board = []
         index = 0
 
-        # Naplň 8 řádků po 8 hodnotách
+        # Naplnění řádků
         for _ in range(8):
             row = []
             for _ in range(8):
@@ -242,8 +238,6 @@ class CheckersGUI:
         self.draw_pieces() 
 
     def handle_server_message(self, message: str):
-        # print("[GUI] Server:", message)
-
         if message.startswith("BOARD"):
             self.update_from_server(message)
 
@@ -271,11 +265,9 @@ class CheckersGUI:
         elif message.startswith("ERROR"):
             err = message.split(" ", 1)[1].strip() if " " in message else "Neznámá chyba"
 
-            # Reset výběru
             self.selected = None
             self.canvas.delete("highlight")
-
-            # Zobraz chybu jako text
+            # Zobrazení chyby
             self.error_label.config(text=f"{err}")
 
             # Auto-hide za 2 sekundy
@@ -287,7 +279,6 @@ class CheckersGUI:
         self.controller.show_lobby(self.my_name)
 
     def quit_game(self, win):
-        """Odpojí hráče a zavře aplikaci."""
         win.destroy()
         try:
             self.network.send("BYE\n")
@@ -300,12 +291,10 @@ class CheckersGUI:
     def on_window_close(self):
         try:
             if self.network:
-                # self.network.send("BYE\n")
                 self.network.close()
         except:
             pass
 
-        # Zavře celé GUI včetně hlavního root
         try:
             self.root.quit()
             self.root.destroy()

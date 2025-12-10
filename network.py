@@ -18,11 +18,9 @@ class NetworkClient:
         self.lock = threading.Lock()
         self.last_ping_time = time.time()
 
-    # --------------------------------------------
-    # CONNECT
-    # --------------------------------------------
     def connect(self):
-        self.stop()  # vždy stopni starý socket bezpečně
+        # zastavení starého socketu
+        self.stop()
 
         try:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,9 +41,6 @@ class NetworkClient:
             self.running = False
             return False
 
-    # --------------------------------------------
-    # LISTEN
-    # --------------------------------------------
     def listen(self):
         try:
             self.sock.settimeout(1.0)
@@ -56,9 +51,10 @@ class NetworkClient:
                     data = self.sock.recv(4096)
                 except socket.timeout:
                     continue
-
+                
+                # server zavřel spojení
                 if not data:
-                    break  # server zavřel spojení
+                    break  
 
                 buffer += data.decode("utf-8")
 
@@ -82,9 +78,6 @@ class NetworkClient:
 
         self._handle_disconnect()
 
-    # --------------------------------------------
-    # SEND
-    # --------------------------------------------
     def send(self, message: str):
         if not self.running:
             return
@@ -97,9 +90,6 @@ class NetworkClient:
         except:
             self._handle_disconnect()
 
-    # --------------------------------------------
-    # WATCHDOG
-    # --------------------------------------------
     def _ping_watchdog(self):
         while self.running:
             if time.time() - self.last_ping_time > PING_TIMEOUT:
@@ -108,9 +98,6 @@ class NetworkClient:
                 return
             time.sleep(1)
 
-    # --------------------------------------------
-    # DISCONNECT HANDLER
-    # --------------------------------------------
     def _handle_disconnect(self):
         if not self.running:
             return
@@ -138,11 +125,8 @@ class NetworkClient:
             else:
                 self.on_disconnect(self)
 
-    # --------------------------------------------
-    # STOP
-    # --------------------------------------------
+
     def stop(self):
-        """Bezpečně ukončí klienta a jeho vlákna."""
         self.running = False
         try:
             with self.lock:
