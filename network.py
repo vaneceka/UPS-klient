@@ -6,7 +6,8 @@ import time
 PING_TIMEOUT = 16
 
 class NetworkClient:
-    def __init__(self, host, port, on_message_callback=None, root=None):
+    global_sock_counter = 0
+    def __init__(self, host, port, on_message_callback=None, root=None):  
         self.host = host
         self.port = port
         self.sock = None
@@ -17,12 +18,12 @@ class NetworkClient:
         self.lock = threading.Lock() 
         self.last_ping_time = time.time()
         self.sock_id = 0
+        self.disconnect_fired = False
 
     def connect(self):
         if self.running:
             print("Stopuji starý klient...")
             self.running = False
-            self.sock_id += 1   # ← stará vlákna okamžitě vypadnou
             try:
                 self.sock.shutdown(socket.SHUT_RDWR)
             except:
@@ -38,9 +39,12 @@ class NetworkClient:
             self.sock.connect((self.host, self.port))
             self.running = True
             self.last_ping_time = time.time()
+            self.disconnect_fired = False
 
             print(f"Připojeno k serveru {self.host}:{self.port}")
-            self.sock_id += 1
+
+            NetworkClient.global_sock_counter += 1
+            self.sock_id = NetworkClient.global_sock_counter
             my_id = self.sock_id
             print(f"moje id je :{my_id}")
 
@@ -104,7 +108,8 @@ class NetworkClient:
         self.running = False
         self.close()
 
-        if self.on_disconnect and active:
+        if self.on_disconnect and not self.disconnect_fired:
+
             # jen aktivní klient má právo vyvolat disconnect událost
             print("wohoooooooo")
             if self.root:
@@ -170,26 +175,34 @@ class NetworkClient:
         self.sock = None
         print("Odpojeno od serveru.")
 
-    def _ping_watchdog(self, my_id, timeout=15):
+    def _ping_watchdog(self, my_id, timeout=8):
         print(f"[WATCHDOG START] my_id={my_id}, sock_id={self.sock_id}, client_obj={id(self)} thread={threading.get_ident()}")
         while self.running and my_id == self.sock_id:
             if time.time() - self.last_ping_time > timeout:
                 print("Watchdog: dlouho nepřišel PING, beru to jako odpojení.")
-                print(f"[WATCHDOG TIMEOUT] my_id={my_id}, sock_id={self.sock_id}, client_obj={id(self)} thread={threading.get_ident()}")
-                # násilně ukončíme spojení
-                self.running = False
-                try:
-                    with self.lock:
-                        if self.sock:
-                            self.sock.shutdown(socket.SHUT_RDWR)
-                except:
-                    pass
-                try:
-                    if self.sock and my_id == self.sock_id:
-                        self.sock.close()
-                except:
-                    pass
-                self.sock = None
+                if not self.disconnect_fired:
+                    self.disconnect_fired = True
+                    print(f"[WATCHDOG TIMEOUT] my_id={my_id}, sock_id={self.sock_id}, client_obj={id(self)} thread={threading.get_ident()}")
+                    # násilně ukončíme spojení
+                    self.running = False
+                    try:
+                        with self.lock:
+                            if self.sock:
+                                self.sock.shutdown(socket.SHUT_RDWR)
+                    except:
+                        pass
+                    try:
+                        if self.sock and my_id == self.sock_id:
+                            self.sock.close()
+                    except:
+                        pass
+                    self.sock = None
+                    # Zavoláme on_disconnect
+                    if self.on_disconnect:
+                        if self.root:
+                            self.root.after(0, lambda cb=self.on_disconnect: cb(self))
+                        else:
+                            self.on_disconnect(self)
 
                 break
 
