@@ -27,7 +27,6 @@ class AppController:
 
     def show_connection_form(self):
         if self.client:
-            print("dostanu se sem???????")
             self.client.on_disconnect = None
             self.client.stop()
         self.client = None

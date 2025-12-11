@@ -81,6 +81,10 @@ class NetworkClient:
     def send(self, message: str):
         if not self.running:
             return
+
+        if message != "PONG" and not message.startswith("UPS "):
+            message = "UPS " + message
+
         if not message.endswith("\n"):
             message += "\n"
 
